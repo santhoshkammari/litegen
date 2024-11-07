@@ -10,30 +10,7 @@ pip install ailite
 
 ## Usage
 
-### 1. Quick Start with `ai()`
-
-The simplest way to get started:
-
-```python
-from ailite import ai
-
-# Simple text generation
-response = ai(
-    "Explain quantum computing",
-    model="nvidia/Llama-3.1-Nemotron-70B-Instruct-HF",
-    conversation=False
-)
-print(response)
-
-# With streaming
-for chunk in ai(
-    "Write a story about space",
-    stream=True
-):
-    print(chunk, end="")
-```
-
-### 2. Server Deployment with `serve()`
+### 1. Initially SETUP Server Deployment with `serve()`
 
 Launch your own API server:
 
@@ -44,7 +21,37 @@ from ailite import serve
 serve()
 ```
 
-### 3. Client Usage with `HUGPIClient`
+### 1. Quick Start with `ai()`
+
+The simplest way to get started:
+
+```python
+from ailite import ai
+response = ai("Explain quantum computing")
+print(response)
+```
+### 2. Customization with `ai()`
+```python
+from ailite import ai
+response = ai(
+    "Explain quantum computing",
+    model="nvidia/Llama-3.1-Nemotron-70B-Instruct-HF",
+    conversation=False
+)
+```
+### 3. Streaming Response with `ai()`
+```python
+from ailite import ai
+# With streaming
+for chunk in ai(
+    "Write a story about space",
+    stream=True
+):
+    print(chunk, end="")
+```
+
+
+### 4. Client Usage with `HUGPIClient`
 
 For more control over interactions:
 
@@ -73,7 +80,7 @@ messages = [
 response = client.messages.create(messages=messages)
 ```
 
-### 4. Base Model with `HUGPiLLM`
+### 5. Base Model with `HUGPiLLM`
 
 For direct model interactions:
 
