@@ -1,6 +1,6 @@
 from typing import List, Dict, Union, Generator, Optional
 
-from src.ailite.main._model._api.types._model_types import MODELS_TYPE
+from ..main._model._api.types._model_types import MODELS_TYPE
 
 
 def stream_response(response):
