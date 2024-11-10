@@ -31,7 +31,7 @@ def get_api_response(prompt, model=None, stream=True, conversation=False, url="h
             yield chunk
 
 
-def streamlit_app():
+def streamlit_app(model:MODELS_TYPE='nvidia/Llama-3.1-Nemotron-70B-Instruct-HF'):
     st.title("Chat with LLMs")
 
     # Add a separator
@@ -48,7 +48,7 @@ def streamlit_app():
     if 'web_search' not in st.session_state:
         st.session_state.web_search = False
     if 'model' not in st.session_state:
-        st.session_state.model = 'nvidia/Llama-3.1-Nemotron-70B-Instruct-HF'  # Default model
+        st.session_state.model = model  # Default model
 
     # Display chat messages
     with chat_container:
