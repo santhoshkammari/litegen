@@ -89,20 +89,27 @@ def ai(
     """
     # Clean up the API URL by removing trailing slashes
     api_url = api_url.rstrip('/')
-
-    # Prepare the request payload
     payload = {
-        "prompt": prompt_or_messages,
         "model": model,
         "conversation": conversation,
         "stream": stream,
         "websearch": websearch,
-        "assistant":assistant
+        "assistant": assistant
     }
+
+    if isinstance(prompt_or_messages,list):
+        base_url = f"{api_url}/v1/chat"
+        payload['messages'] = prompt_or_messages
+    else:
+        base_url = f"{api_url}/v1/generate"
+        payload['prompt'] = prompt_or_messages
+
+    # Prepare the request payload
+
 
     # Send the request and get response
     response = requests.post(
-        f"{api_url}/v1/generate",
+        base_url,
         json=payload,
         stream=stream
     )

@@ -222,9 +222,9 @@ class Messages:
         conversation = False if conversation is None else conversation
         curr_sys_prompt, user_prompt = self._get_sys_and_user_prompt(messages)
 
-        if assistant or (not conversation) or model!='nvidia/Llama-3.1-Nemotron-70B-Instruct-HF':
+        if assistant or (not conversation) or model!='nvidia/Llama-3.1-Nemotron-70B-Instruct-HF' or curr_sys_prompt!=self.system_prompt:
             if curr_sys_prompt and (curr_sys_prompt != self.system_prompt):
-                self.system_prompt = curr_sys_prompt + self.tool_prompt if self.tools else ""
+                self.system_prompt = curr_sys_prompt + (self.tool_prompt if self.tools else "")
             if assistant:
                 assistant = self.llm.search_assistant(assistant_name=assistant)
             self.llm.new_conversation(modelIndex=AVAILABLE_MODEL_LIST.index(model) if model else 0,

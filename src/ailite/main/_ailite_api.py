@@ -35,35 +35,35 @@ class GenerateRequest(BaseModel):
 
 @app.post("/v1/chat")
 async def chat(request: ChatRequest):
-    try:
-        messages = [msg.dict() for msg in request.messages]
-        if request.stream:
-            return StreamingResponse(
-                stream_chatbot_response(request),
-                media_type="text/event-stream"
-            )
-        else:
-            response = client.messages.create(messages = messages, model_name=request.model, conversation=request.conversation,
-                                              web_search = request.websearch)
-            return {"message": {"content": response.content[0]["text"]}}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    # try:
+    messages = [msg.dict() for msg in request.messages]
+    if request.stream:
+        return StreamingResponse(
+            stream_chatbot_response(request),
+            media_type="text/event-stream"
+        )
+    else:
+        response = client.messages.create(messages = messages, model_name=request.model, conversation=request.conversation,
+                                          web_search = request.websearch)
+        return {"message": {"content": response.content[0]["text"]}}
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/v1/generate")
 async def generate(request: GenerateRequest):
-    try:
-        if request.stream:
-            return StreamingResponse(
-                stream_chatbot_response(request),
-                media_type="text/event-stream"
-            )
-        else:
-            response = client.messages.create(prompt = request.prompt, model_name=request.model, conversation=request.conversation,
-                                              web_search = request.websearch)
-            return {"message": {"content": response.content[0]["text"]}}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    # try:
+    if request.stream:
+        return StreamingResponse(
+            stream_chatbot_response(request),
+            media_type="text/event-stream"
+        )
+    else:
+        response = client.messages.create(prompt = request.prompt, model_name=request.model, conversation=request.conversation,
+                                          web_search = request.websearch)
+        return {"message": {"content": response.content[0]["text"]}}
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail=str(e))
 
 async def stream_chatbot_response(request:GenerateRequest):
     for chunk in client.messages.create(messages=request.prompt, model_name=request.model, conversation=request.conversation,
