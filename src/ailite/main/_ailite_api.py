@@ -5,12 +5,12 @@ from pydantic import BaseModel
 from typing import List, Optional, Union
 from fastapi.responses import StreamingResponse
 
+from ._model._api._client import HUGPIClient
 from ..prompts import AILITE_X_CLAUDE_PROMPT
 from ._model._api.types._model_types import MODELS_TYPE
 
 app = FastAPI()
 
-from hugpi import HUGPIClient
 client = None
 
 # Initialize the HuggyLLM instance

@@ -3,6 +3,7 @@ AVAILABLE_MODEL_LIST = [
     'CohereForAI/c4ai-command-r-plus-08-2024',
     'Qwen/Qwen2.5-72B-Instruct',
     'nvidia/Llama-3.1-Nemotron-70B-Instruct-HF',
+    'Qwen/Qwen2.5-Coder-32B-Instruct',
     'meta-llama/Llama-3.2-11B-Vision-Instruct',
     'NousResearch/Hermes-3-Llama-3.1-8B',
     'mistralai/Mistral-Nemo-Instruct-2407',

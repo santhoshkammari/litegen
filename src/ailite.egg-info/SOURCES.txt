@@ -39,3 +39,5 @@ src/ailite/main/_model/_base/_hf_chatbot_custom.py
 src/ailite/main/_model/_utils/__init__.py
 src/ailite/main/_model/_utils/_const.py
 src/ailite/main/_model/_utils/_print_text.py
+src/ailite/prompts/__init__.py
+src/ailite/prompts/prompts.py
