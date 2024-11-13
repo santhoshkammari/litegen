@@ -201,20 +201,18 @@ class Messages:
                                                 conversation=conversation,
                                                 assistant=assistant)
         res = self.llm.chat(user_prompt, stream=True, **kwargs)
-        for token in self._stream_with_chat(res, max_tokens):
-            if token == '<MAX_TOKEN_REACHED>':
-                break
-            usage = Usage(input_tokens=10, output_tokens=10)
-            yield Message(
-                id=str(uuid.uuid4()),
-                role="assistant",
-                content=[{"type": "text", "text": token}],
-                type='message',
-                model=model if model else 'nvidia/Llama-3.1-Nemotron-70B-Instruct-HF',
-                conversation=conversation,
-                usage=usage,
-                **kwargs
-            )
+        for token in res:
+            if token:
+                yield Message(
+                    id=str(uuid.uuid4()),
+                    role="assistant",
+                    content=[{"type": "text", "text": token['token']}],
+                    type='message',
+                    model=model if model else 'nvidia/Llama-3.1-Nemotron-70B-Instruct-HF',
+                    conversation=conversation,
+                    usage = Usage(input_tokens=10, output_tokens=10),
+                    **kwargs
+                )
 
 
 

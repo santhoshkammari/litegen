@@ -39,7 +39,7 @@ async def chat(request: ChatRequest):
     messages = [msg.dict() for msg in request.messages]
     if request.stream:
         return StreamingResponse(
-            stream_chatbot_response(request),
+            stream_chatbot_response_chat(request),
             media_type="text/event-stream"
         )
     else:
@@ -71,6 +71,16 @@ async def stream_chatbot_response(request:GenerateRequest):
                                         stream=True):
         yield chunk.content[0]['text']
         await asyncio.sleep(0)  # Allow other tasks to run
+
+async def stream_chatbot_response_chat(request:ChatRequest):
+    messages = [{"role":m.role,"content":m.content} for m in request.messages]
+    for chunk in client.messages.create(messages=messages, model_name=request.model, conversation=request.conversation,
+                                        web_search=request.websearch,
+                                        stream=True):
+        yield chunk.content[0]['text']
+        await asyncio.sleep(0)  # Allow other tasks to run
+
+
 
 def serve(
     model:MODELS_TYPE = 'nvidia/Llama-3.1-Nemotron-70B-Instruct-HF',

@@ -3,7 +3,7 @@ from typing import List, Dict, Union, Generator, Optional
 from ..main._model._api.types._model_types import MODELS_TYPE
 
 
-def stream_response(response):
+def stream_response(response,input_messages):
     for chunk in response.iter_content(decode_unicode=True):
         if chunk:
             yield chunk
@@ -115,7 +115,7 @@ def ai(
     )
     response.raise_for_status()
     if stream:
-        return stream_response(response)
+        return stream_response(response,input_messages = prompt_or_messages)
     else:
         if json:
             return response.json()
