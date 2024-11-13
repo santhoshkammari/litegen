@@ -5,6 +5,7 @@ AILite: A lightweight AI library for interacting with HuggingFace and Claude mod
 from .main._model._api import HUGPiLLM,HUGPIClient
 from .main._ailite import ai, ClaudeEngine
 from .main._ailite_api import serve
+from .features import *
 
 # Define what should be accessible when using "from ailite import *"
 __all__ = [
