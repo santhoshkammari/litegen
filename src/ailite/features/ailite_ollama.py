@@ -97,10 +97,10 @@ class OllamaAPI(FastAPI):
         async def chat(request: ChatRequest):
             if request.stream:
                 return StreamingResponse(
-                    self._stream_chat(request),
+                    self._stream_chat(request,process_messages(request.messages)),
                     media_type="text/event-stream"
                 )
-            return await self._chat(request)
+            return await self._chat(request,process_messages(request.messages))
 
         # @self.post("/v1/chat/completions")
         # async def chat(request: ChatRequest):

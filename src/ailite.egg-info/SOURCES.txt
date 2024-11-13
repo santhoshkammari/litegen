@@ -1,7 +1,7 @@
 LICENSE
 README.md
 pyproject.toml
-setup.cfg
+src/__init__.py
 src/ailite/__init__.py
 src/ailite.egg-info/PKG-INFO
 src/ailite.egg-info/SOURCES.txt
@@ -9,6 +9,7 @@ src/ailite.egg-info/dependency_links.txt
 src/ailite.egg-info/requires.txt
 src/ailite.egg-info/top_level.txt
 src/ailite/features/__init__.py
+src/ailite/features/ailite_ollama.py
 src/ailite/features/inference_gradio.py
 src/ailite/main/__init__.py
 src/ailite/main/_ailite.py
