@@ -1,0 +1,30 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution/packaging
+dist/
+build/
+*.egg-info/
+
+# IDE files
+.idea/
+
+# Test files
+tests/cookies/
+
+# Virtual Environment
+venv/
+env/
+.env/
+
+# Build files
+*.so
+*.egg
+*.egg-info
+*.whl
+
+# Misc
+.DS_Store
+*.log
