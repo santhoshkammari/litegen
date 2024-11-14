@@ -2,7 +2,7 @@ import asyncio
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Any, Dict
 from fastapi.responses import StreamingResponse
 
 from ._model._api._client import HUGPIClient
@@ -24,6 +24,8 @@ class ChatRequest(BaseModel):
     conversation: Optional[bool] = False
     stream: Optional[bool] = False
     websearch:Optional[bool] = False
+    tools: Optional[List[Dict[str, Any]]] = None
+
 
 class GenerateRequest(BaseModel):
     prompt: str
@@ -44,7 +46,8 @@ async def chat(request: ChatRequest):
         )
     else:
         response = client.messages.create(messages = messages, model_name=request.model, conversation=request.conversation,
-                                          web_search = request.websearch)
+                                          web_search = request.websearch,
+                                          tools=request.tools)
         return {"message": {"content": response.content[0]["text"]}}
     # except Exception as e:
     #     raise HTTPException(status_code=500, detail=str(e))

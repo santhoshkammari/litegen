@@ -185,11 +185,8 @@ class OllamaAPI(FastAPI):
         return response
 
     async def _stream_chat(self, request: ChatRequest,processed_messages):
-        print('@@@@@@@')
-        print(processed_messages)
-        print('####3')
         for word in ai(prompt_or_messages=processed_messages,model=request.model,stream=True,
-                       api_url = f"http://{self.host}:{self.port}"):
+                       api_url = f"http://{self.host}:{self.port}",tools=request.tools):
             print(word,end = "",flush=True)
             await asyncio.sleep(0)
             response = {

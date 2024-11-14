@@ -68,7 +68,8 @@ def ai(
     websearch: bool = False,
     stream: bool = False,
     json:bool = False,
-    assistant:Optional[str] = None
+    assistant:Optional[str] = None,
+    tools: Optional[List[Dict[str, Any]]] = None
 ) -> str|Generator:
     """
     Send a request to the AI API and get the response.
@@ -94,12 +95,12 @@ def ai(
         "conversation": conversation,
         "stream": stream,
         "websearch": websearch,
-        "assistant": assistant
-    }
+        "assistant": assistant    }
 
     if isinstance(prompt_or_messages,list):
         base_url = f"{api_url}/v1/chat"
         payload['messages'] = prompt_or_messages
+        payload['tools']=tools
     else:
         base_url = f"{api_url}/v1/generate"
         payload['prompt'] = prompt_or_messages
