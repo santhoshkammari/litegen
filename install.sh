@@ -10,4 +10,8 @@ pip uninstall -y ailite
 
 python -m build
 
+# Install the wheel file
+pip install dist/*.whl
+
+# Upload to PyPI
 twine upload dist/*

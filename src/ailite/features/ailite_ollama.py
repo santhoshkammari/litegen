@@ -472,8 +472,9 @@ def add_openai_routes(app: OllamaAPI):
 def initialize_openai_routes(app: OllamaAPI):
     add_openai_routes(app)
 
-def ailite_ollama_api(host="0.0.0.0", port=11436):
-    app = OllamaAPI(host=host,port=port)
+def ailite_ollama_api(host="0.0.0.0", port=11436,ollama_port="0.0.0.0",
+                      ollama_host = 11435):
+    app = OllamaAPI(host=ollama_host,port=ollama_port)
     initialize_openai_routes(app)  # Add this line to initialize OpenAI routes
     uvicorn.run(app, host=host,port=port)
 
