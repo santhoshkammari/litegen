@@ -65,8 +65,10 @@ class EmbedRequest(BaseModel):
 
 
 class OllamaAPI(FastAPI):
-    def __init__(self):
+    def __init__(self,host="localhost",port=11436):
         super().__init__(title="Ollama-like API")
+        self.host = host
+        self.port = port
         self.active_models = {}
         self.model_details = {}
         self.setup_routes()
@@ -149,7 +151,8 @@ class OllamaAPI(FastAPI):
 
     async def _stream_generate(self, request: GenerateRequest):
         # Simulate streaming response
-        for word in ai(model=request.model,prompt_or_messages=request.prompt,stream=True):
+        for word in ai(model=request.model,prompt_or_messages=request.prompt,stream=True,
+                       api_url = f"http://{self.host}:{self.port}"):
             await asyncio.sleep(0)
             response = {
                 "model": request.model,
@@ -185,7 +188,8 @@ class OllamaAPI(FastAPI):
         print('@@@@@@@')
         print(processed_messages)
         print('####3')
-        for word in ai(prompt_or_messages=processed_messages,model=request.model,stream=True):
+        for word in ai(prompt_or_messages=processed_messages,model=request.model,stream=True,
+                       api_url = f"http://{self.host}:{self.port}"):
             print(word,end = "",flush=True)
             await asyncio.sleep(0)
             response = {
@@ -246,7 +250,8 @@ class OllamaAPI(FastAPI):
         ]
 
     def get_ai_response(self, prompt,model):
-        return ai(prompt_or_messages=prompt,model=model)
+        return ai(prompt_or_messages=prompt,model=model,
+                  api_url = f"http://{self.host}:{self.port}")
 
 
 
@@ -468,7 +473,7 @@ def initialize_openai_routes(app: OllamaAPI):
     add_openai_routes(app)
 
 def ailite_ollama_api(host="0.0.0.0", port=11436):
-    app = OllamaAPI()
+    app = OllamaAPI(host=host,port=port)
     initialize_openai_routes(app)  # Add this line to initialize OpenAI routes
     uvicorn.run(app, host=host,port=port)
 
