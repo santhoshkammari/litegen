@@ -1,2 +1,7 @@
 parselite
 searchlite
+langchain_core
+uvicorn
+fastapi
+hugpi
+hugchat

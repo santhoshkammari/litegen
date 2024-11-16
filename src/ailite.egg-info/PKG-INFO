@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: ailite
-Version: 5.0.6
+Version: 5.0.7
 Summary: A powerful web content fetcher and processor
 Author-email: Your Name <your.email@example.com>
 Project-URL: Homepage, https://github.com/yourusername/pyopengenai
@@ -13,6 +13,11 @@ Description-Content-Type: text/markdown
 License-File: LICENSE
 Requires-Dist: parselite
 Requires-Dist: searchlite
+Requires-Dist: langchain_core
+Requires-Dist: uvicorn
+Requires-Dist: fastapi
+Requires-Dist: hugpi
+Requires-Dist: hugchat
 
 # Ailite
 
