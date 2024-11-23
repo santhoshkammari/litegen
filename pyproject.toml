@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ailite"
-version = "5.0.8"
+version = "5.0.9"
 description = "A powerful web content fetcher and processor"
 authors = [{name = "Your Name", email = "your.email@example.com"}]
 license = {file = "LICENSE"}
@@ -22,7 +22,8 @@ dependencies = [
     "uvicorn",
     "fastapi",
     "hugpi",
-    "hugchat"
+    "hugchat",
+    "gradio-client"
 ]
 
 [project.urls]
