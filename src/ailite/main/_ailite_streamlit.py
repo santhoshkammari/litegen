@@ -16,7 +16,6 @@ MODELS_TYPE =  Literal[
     'microsoft/Phi-3.5-mini-instruct'
 ]
 
-
 def get_api_response(prompt, model=None, stream=True, conversation=False, url="http://0.0.0.0:11435/v1/generate",
                      web_search=False) -> Generator:
     data = {

@@ -1,3 +1,3 @@
-from src.ailite.main._ailite_api import serve
+from src  import ailite
 
-serve()
+print(ailite.ailite("what is 1+1?"))

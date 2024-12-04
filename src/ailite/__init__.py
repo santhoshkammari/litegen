@@ -6,9 +6,11 @@ from .main._model._api import HUGPiLLM,HUGPIClient
 from .main._ailite import ai, ClaudeEngine
 from .main._ailite_api import serve
 from .features import *
-
+from .hf_official_api import *
 # Define what should be accessible when using "from ailite import *"
 __all__ = [
+    'ailite',
+    'AILite',
     'ai',
     'HUGPIClient',
     'HUGPiLLM',

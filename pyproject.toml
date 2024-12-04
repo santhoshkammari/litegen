@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ailite"
-version = "5.0.9"
-description = "A powerful web content fetcher and processor"
+version = "5.1.0"
+description = "HuggingFace Commercial Model Free API "
 authors = [{name = "Your Name", email = "your.email@example.com"}]
 license = {file = "LICENSE"}
 readme = "README.md"
