@@ -1,1 +1,1 @@
-from ._main import HFLM,HFModelType
+from ._dspy import HFLM

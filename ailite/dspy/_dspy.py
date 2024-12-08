@@ -1,17 +1,23 @@
+import os
+
 import dspy
 import litellm
 from ailitellm import HFModelType
+
+from dotenv import load_dotenv
+load_dotenv()
+HF_API_KEY = os.environ.get("HF_API_KEY")
 
 class HFLM(dspy.LM):
     """HuggingFace Language Model integration for DSPy using LiteLLM"""
 
     def __init__(
         self,
-        model: HFModelType,
-        api_key: str = "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",
+        model: HFModelType = 'Qwen/Qwen2.5-72B-Instruct',
+        api_key: str = HF_API_KEY,
         model_type: str = "chat",
-        temperature: float = 0.7,
-        max_tokens: int = 2048,
+        temperature: float = 0.0,
+        max_tokens: int = 4096,
         cache: bool = True,
         **kwargs
     ):

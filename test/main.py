@@ -1,1 +1,3 @@
-from ailite.dspy import DSpy
+from ailite.langchain import ChatOpenAI
+llm = ChatOpenAI()
+print(llm.invoke("who are you?"))

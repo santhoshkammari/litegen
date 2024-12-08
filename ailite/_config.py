@@ -1,0 +1,1 @@
+HF_API_KEY:str = "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"
