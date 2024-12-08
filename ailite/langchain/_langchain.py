@@ -17,9 +17,9 @@ import json
 
 from ailitellm import HFModelType
 
-from dotenv import load_dotenv
-load_dotenv()
-HF_API_KEY = os.environ.get("HF_API_KEY")
+# from dotenv import load_dotenv
+# load_dotenv("../../.env")
+# HF_API_KEY = os.environ.get("HF_API_KEY")
 
 
 def _convert_message_to_dict(message: BaseMessage) -> dict:
@@ -48,7 +48,7 @@ class ChatOpenAI(BaseChatModel):
     model_name: HFModelType = Field(default="Qwen/Qwen2.5-72B-Instruct", description="The HF model to use.")
     temperature: float = Field(default=0.7, description="What sampling temperature to use.")
     model_kwargs: Dict[str, Any] = Field(default_factory=dict)
-    openai_api_key: SecretStr = Field(default=SecretStr(HF_API_KEY))
+    openai_api_key: SecretStr = Field(default=SecretStr("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"))
     base_url: str = Field(default="https://api-inference.huggingface.co/v1/")
     max_tokens: Optional[int] = 4028
     n: int = 1

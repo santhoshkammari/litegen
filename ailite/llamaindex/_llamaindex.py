@@ -23,7 +23,7 @@ from ailitellm import HFModelType
 from pydantic import Field
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv("../../.env")
 HF_API_KEY = os.environ.get("HF_API_KEY")
 
 
@@ -34,7 +34,7 @@ class OpenAI(FunctionCallingLLM):
     additional_kwargs: Dict[str, Any] = Field(default_factory=dict)
     max_retries: int = Field(default=3)
     timeout: float = Field(default=60.0)
-    api_key: str = Field(default=HF_API_KEY)
+    api_key: str = Field(default="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")
     base_url: str = Field(default="https://api-inference.huggingface.co/v1/")
     reuse_client: bool = Field(default=True)
 
@@ -289,3 +289,8 @@ class OpenAI(FunctionCallingLLM):
                 )
             )
         return selections
+
+if __name__ == '__main__':
+    llm = OpenAI()
+    resp = llm.complete("2+3?")
+    print(resp)

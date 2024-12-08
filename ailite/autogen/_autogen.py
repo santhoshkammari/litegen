@@ -13,9 +13,11 @@ from autogen_core.components.models import (
 from autogen_core.components.tools import Tool, ToolSchema
 from autogen_core.base import CancellationToken
 
-from dotenv import load_dotenv
-load_dotenv()
-HF_API_KEY = os.environ.get("HF_API_KEY")
+# from dotenv import load_dotenv
+# load_dotenv("../../.env")
+
+
+# HF_API_KEY = os.environ.get("HF_API_KEY")
 
 
 class AILiteConfig(BaseModel):

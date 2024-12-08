@@ -1,8 +1,8 @@
 import os
 
-from dotenv import load_dotenv
-load_dotenv()
-HF_API_KEY = os.environ.get("HF_API_KEY")
+# from dotenv import load_dotenv
+# load_dotenv("../../.env")
+# HF_API_KEY = os.environ.get("HF_API_KEY")
 
 from typing import Optional, List, Any, Dict, Literal
 from datetime import datetime
@@ -20,7 +20,7 @@ class HFLM(BaseLM):
     def __init__(
         self,
         model: HFModelType = "Qwen/Qwen2.5-72B-Instruct",
-        api_key: str = HF_API_KEY,
+        api_key: str = "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",
         model_type: Literal["chat", "text"] = "chat",
         temperature: float = 0.0,
         max_tokens: int = 1000,
