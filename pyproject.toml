@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ailite"
-version = "6.0.2"
+version = "6.0.5"
 description = "All popular Framework HF integration kit"
 authors = ["Kammari Santhosh"]
 readme = "README.md"
@@ -16,10 +16,11 @@ include = [
 ]
 
 [tool.poetry.dependencies]
+ailitellm="0.1.6"
 python = "^3.10"
 dspy="^2.5.41"
-litellm="^1.54.0"
-ailitellm="^0.1.6"
+
+
 
 #[tool.poetry.scripts]
 #claude-chat = "chat_gui:run_app"
