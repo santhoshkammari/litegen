@@ -37,7 +37,7 @@ class OpenAIChatCompletionClient(ChatCompletionClient):
         model: str = "Qwen/Qwen2.5-72B-Instruct",
         temperature: float = 0.7,
         kwargs: Dict[str, Any] = None,
-        api_key: str = HF_API_KEY,
+        api_key: str = "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",
         base_url: str = "https://api-inference.huggingface.co/v1/",
     ):
         self.config = AILiteConfig(
