@@ -1,31 +1,29 @@
-[build-system]
-requires = ["setuptools>=45", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project]
+[tool.poetry]
 name = "ailite"
-version = "5.1.0"
-description = "HuggingFace Commercial Model Free API "
-authors = [{name = "Your Name", email = "your.email@example.com"}]
-license = {file = "LICENSE"}
+version = "6.0.2"
+description = "All popular Framework HF integration kit"
+authors = ["Kammari Santhosh"]
 readme = "README.md"
-requires-python = ">=3.7"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
+license = "MIT License"
+repository = "https://github.com/santhosh/"
+keywords = [""]
+packages = [
+    {include = "ailite"}
 ]
-dependencies = [
-    "parselite",
-    "searchlite",
-    "langchain_core",
-    "uvicorn",
-    "fastapi",
-    "hugpi",
-    "hugchat",
-    "gradio-client"
+include = [
+    "chat_gui.py",
+    "chat_run.py"
 ]
 
-[project.urls]
-"Homepage" = "https://github.com/yourusername/pyopengenai"
-"Bug Tracker" = "https://github.com/yourusername/pyopengenai/issues"
+[tool.poetry.dependencies]
+python = "^3.10"
+dspy="^2.5.41"
+litellm="^1.54.0"
+ailitellm="^0.1.6"
+
+#[tool.poetry.scripts]
+#claude-chat = "chat_gui:run_app"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
