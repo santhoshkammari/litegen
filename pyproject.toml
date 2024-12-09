@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ailite"
-version = "6.1.8"
+version = "6.1.9"
 description = "All popular Framework HF integration kit"
 authors = ["Kammari Santhosh"]
 readme = "README.md"

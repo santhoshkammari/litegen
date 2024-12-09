@@ -1,5 +1,8 @@
 import os
-from typing import Any, Dict, List, Optional, Sequence, Union, cast, Iterator, AsyncIterator, Literal
+import typing
+from typing import Any, Dict, List, Optional, Sequence, Union, cast, Iterator, AsyncIterator, Literal, Callable
+
+from langchain_core.language_models import LanguageModelInput
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import (
     AIMessage,
@@ -11,16 +14,13 @@ from langchain_core.messages import (
 )
 from langchain_core.outputs import ChatGeneration, ChatGenerationChunk, ChatResult
 from langchain_core.callbacks import CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun
-from pydantic import Field, SecretStr, root_validator
+from langchain_core.runnables import Runnable
+from langchain_core.tools import BaseTool
+from langchain_core.utils.function_calling import convert_to_openai_tool
+from pydantic import Field, SecretStr
 from openai import OpenAI, AsyncOpenAI
-import json
 
 from ailitellm import HFModelType
-
-# from dotenv import load_dotenv
-# load_dotenv("../../.env")
-# HF_API_KEY = os.environ.get("HF_API_KEY")
-
 
 def _convert_message_to_dict(message: BaseMessage) -> dict:
     """Convert LangChain message to dictionary format."""
@@ -198,6 +198,55 @@ class ChatOpenAI(BaseChatModel):
     ) -> ChatResult:
         # For simplicity, using sync version for now
         return self._generate(messages, stop, run_manager, **kwargs)
+
+    def bind_tools(
+        self,
+        tools: Sequence[Union[Dict[str, Any], typing.Type, Callable, BaseTool]],
+        *,
+        tool_choice: Optional[
+            Union[dict, str, Literal["auto", "none", "required", "any"], bool]
+        ] = None,
+        strict: Optional[bool] = None,
+        **kwargs: Any,
+    ) -> Runnable[LanguageModelInput, BaseMessage]:
+        formatted_tools = [
+            convert_to_openai_tool(tool, strict=strict) for tool in tools
+        ]
+        if tool_choice:
+            if isinstance(tool_choice, str):
+                # tool_choice is a tool/function name
+                if tool_choice not in ("auto", "none", "any", "required"):
+                    tool_choice = {
+                        "type": "function",
+                        "function": {"name": tool_choice},
+                    }
+                # 'any' is not natively supported by OpenAI API.
+                # We support 'any' since other models use this instead of 'required'.
+                if tool_choice == "any":
+                    tool_choice = "required"
+            elif isinstance(tool_choice, bool):
+                tool_choice = "required"
+            elif isinstance(tool_choice, dict):
+                tool_names = [
+                    formatted_tool["function"]["name"]
+                    for formatted_tool in formatted_tools
+                ]
+                if not any(
+                    tool_name == tool_choice["function"]["name"]
+                    for tool_name in tool_names
+                ):
+                    raise ValueError(
+                        f"Tool choice {tool_choice} was specified, but the only "
+                        f"provided tools were {tool_names}."
+                    )
+            else:
+                raise ValueError(
+                    f"Unrecognized tool_choice type. Expected str, bool or dict. "
+                    f"Received: {tool_choice}"
+                )
+            kwargs["tool_choice"] = tool_choice
+        return super().bind(tools=formatted_tools, **kwargs)
+
 
 if __name__ == '__main__':
     messages = [
