@@ -1,0 +1,5 @@
+openai~=1.58.1
+wordllama~=0.3.7
+visionlite~=0.1.60
+numpy~=2.2.1
+ailite~=7.0.11
