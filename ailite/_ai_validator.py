@@ -58,7 +58,8 @@ class AIValidator:
                                                   f"query : {q}"}] for q, v, s in zip(queries, validations,scores)]
         return [_.content for _ in self.llm.batch(_messages)]
 
-    def get_updated_content(self,content:str,return_list:bool=False,llm=None):
+    def get_updated_content(self,content:str,llm=None,
+                            return_list:bool=False):
         if llm:
             self.llm=llm
         chunks = self.get_content_splits(content)
