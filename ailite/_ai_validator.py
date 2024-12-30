@@ -1,4 +1,5 @@
 from concurrent.futures.thread import ThreadPoolExecutor
+from functools import partial
 
 from langchain_ollama import ChatOllama
 from wordllama import WordLlama
@@ -22,8 +23,16 @@ class AIValidator:
         return [_.content for _ in self.llm.batch(_messages)]
 
     @classmethod
-    def search_google(cls,queries:list):
+    def search_google(cls, queries: list, k=None, max_urls=None, allow_pdf_extraction=None,
+                      allow_youtube_urls_extraction=None):
         """Threadpool executor search using vision"""
+        vision_with_args = partial(
+            vision,
+            k=k,
+            max_urls=max_urls,
+            allow_pdf_extraction=allow_pdf_extraction,
+            allow_youtube_urls_extraction=allow_youtube_urls_extraction
+        )
         with ThreadPoolExecutor(max_workers=4) as executor:
             return list(executor.map(vision, queries))
 
@@ -58,13 +67,16 @@ class AIValidator:
                                                   f"query : {q}"}] for q, v, s in zip(queries, validations,scores)]
         return [_.content for _ in self.llm.batch(_messages)]
 
-    def get_updated_content(self,content:str,llm=None,
-                            return_list:bool=False):
+    def get_updated_content(self, content: str, llm=None,
+                            return_list: bool = False, k=5, max_urls=20, allow_pdf_extraction=True,
+                            allow_youtube_urls_extraction=None):
         if llm:
-            self.llm=llm
+            self.llm = llm
         chunks = self.get_content_splits(content)
         google_questions = self.generate_google_question(chunks)
-        google_results = self.search_google(google_questions)
+        google_results = self.search_google(google_questions, k=k, max_urls=max_urls,
+                                            allow_pdf_extraction=allow_pdf_extraction,
+                                            allow_youtube_urls_extraction=allow_youtube_urls_extraction)
         validations = self.validate_queries(google_questions, google_results)
         validation_scores = self.get_validation_scores(chunks, validations)
         updated_chunks = self.update_chunks(chunks, validations, validation_scores)

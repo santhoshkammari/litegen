@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "ailite"
-version = "7.0.8"
+version = "7.0.9"
 description = "All popular Framework HF integration kit"
 authors = [ "Kammari Santhosh",]
 readme = "README.md"
