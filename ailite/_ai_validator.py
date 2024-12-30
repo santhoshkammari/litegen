@@ -8,7 +8,7 @@ from visionlite import vision
 class AIValidator:
     def __init__(self,wllm=None,llm=None):
         self.wllm = wllm or WordLlama.load()
-        self.llm = llm or ChatOllama(model="llama3.2:latest")
+        self.llm = llm or ChatOllama(model="llama3.2:3b-instruct-q4_K_M")
 
     def get_content_splits(self,content:str):
         return self.wllm.split(content) if content else []
@@ -59,12 +59,12 @@ class AIValidator:
         return [_.content for _ in self.llm.batch(_messages)]
 
     def get_updated_content(self,content:str,return_list:bool=False):
-        chunks = validator.get_content_splits(content)
-        google_questions = validator.generate_google_question(chunks)
-        google_results = validator.search_google(google_questions)
-        validations = validator.validate_queries(google_questions, google_results)
-        validation_scores = validator.get_validation_scores(chunks, validations)
-        updated_chunks = validator.update_chunks(chunks, validations, validation_scores)
+        chunks = self.get_content_splits(content)
+        google_questions = self.generate_google_question(chunks)
+        google_results = self.search_google(google_questions)
+        validations = self.validate_queries(google_questions, google_results)
+        validation_scores = self.get_validation_scores(chunks, validations)
+        updated_chunks = self.update_chunks(chunks, validations, validation_scores)
         if return_list:
             return updated_chunks
         return "".join(updated_chunks)
