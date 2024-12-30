@@ -58,7 +58,9 @@ class AIValidator:
                                                   f"query : {q}"}] for q, v, s in zip(queries, validations,scores)]
         return [_.content for _ in self.llm.batch(_messages)]
 
-    def get_updated_content(self,content:str,return_list:bool=False):
+    def get_updated_content(self,content:str,return_list:bool=False,llm=None):
+        if llm:
+            self.llm=llm
         chunks = self.get_content_splits(content)
         google_questions = self.generate_google_question(chunks)
         google_results = self.search_google(google_questions)
