@@ -1,5 +1,1 @@
-from .model import (
-    completion,
-    gpu_completion,
-    pp_completion
-)
+from .model import completion,pp_completion

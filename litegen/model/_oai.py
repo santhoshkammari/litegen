@@ -54,7 +54,6 @@ class OmniLLMClient:
         stream: bool = False,
         stop: Optional[List[str]] = None,
         tools=None,
-        return_type: Literal['str', 'openai'] = 'openai',
         **kwargs
     ):
         """Create a chat completion with either messages or individual components."""
@@ -79,16 +78,6 @@ class OmniLLMClient:
             tools=tools,
             **kwargs
         )
-
-        # Handle streaming responses
-        if stream:
-            if return_type == 'str':
-                return self._stream_to_string(response)
-            return response
-
-        # Handle non-streaming responses
-        if return_type == 'str':
-            return self._extract_response_text(response)
         return response
 
     def _stream_to_string(self, stream_response):

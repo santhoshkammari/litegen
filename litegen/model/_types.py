@@ -18,5 +18,6 @@ ModelType = Literal[
     "llama3.2:1b-instruct-fp16",
     "llama3.2:3b-instruct-q4_K_M",
     "llama3.2:3b-instruct-fp16",
+    "exaone3.5:2.4b",
     "gpt-4o-mini"
 ]
