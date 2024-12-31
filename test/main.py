@@ -1,3 +1,4 @@
-from litegen.utils import surya_ocr_server
+from  litegen.model import pp_completion
 
-surya_ocr_server(port=8001)
+pp_completion(model='smollm2:1.7b-instruct-fp16',
+                        messages="tell me about narendra modi in 5 paragrapsh simple")

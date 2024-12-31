@@ -54,7 +54,7 @@ class OmniLLMClient:
         stream: bool = False,
         stop: Optional[List[str]] = None,
         tools=None,
-        return_type: Literal['str', 'openai'] = 'str',
+        return_type: Literal['str', 'openai'] = 'openai',
         **kwargs
     ):
         """Create a chat completion with either messages or individual components."""
