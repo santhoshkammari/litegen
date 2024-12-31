@@ -3,7 +3,7 @@
 import os
 
 from openai import OpenAI
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Literal
 from langchain_core.utils.function_calling import convert_to_openai_function
 
 
@@ -54,6 +54,7 @@ class OmniLLMClient:
         stream: bool = False,
         stop: Optional[List[str]] = None,
         tools=None,
+        return_type: Literal['str', 'openai'] = 'str',
         **kwargs
     ):
         """Create a chat completion with either messages or individual components."""
@@ -67,7 +68,8 @@ class OmniLLMClient:
         if tools:
             tools = self._prepare_tools(tools)
 
-        return self.client.chat.completions.create(
+        # Get response from API
+        response = self.client.chat.completions.create(
             model=model,
             messages=messages,
             temperature=temperature,
@@ -77,6 +79,27 @@ class OmniLLMClient:
             tools=tools,
             **kwargs
         )
+
+        # Handle streaming responses
+        if stream:
+            if return_type == 'str':
+                return self._stream_to_string(response)
+            return response
+
+        # Handle non-streaming responses
+        if return_type == 'str':
+            return self._extract_response_text(response)
+        return response
+
+    def _stream_to_string(self, stream_response):
+        """Convert streaming response to string iterator."""
+        for chunk in stream_response:
+            if chunk.choices[0].delta.content is not None:
+                yield chunk.choices[0].delta.content
+
+    def _extract_response_text(self, response) -> str:
+        """Extract text from non-streaming response."""
+        return response.choices[0].message.content or ""
 
     @staticmethod
     def handle_str_messages(messages, system_prompt):

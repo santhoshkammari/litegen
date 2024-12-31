@@ -119,7 +119,7 @@ class TTCSearchValidator:
 
 # Example usage
 if __name__ == "__main__":
-    from ailite.model import qwen2p5_7b
+    from litegen.model import qwen2p5_7b
     validator = TTCSearchValidator(n_candidates=4, beam_width=2,llm=qwen2p5_7b(True))
     result = validator.validate_content("Bananas are not classified as berries, while strawberries are true berries.")
     print("Validation Result:")

@@ -1,6 +1,4 @@
-from functools import partial
-
-from ailite.model._oai import OmniLLMClient
+from litegen.model._oai import OmniLLMClient
 
 
 class ServingModel:
@@ -38,10 +36,10 @@ class ServingModel:
 
             if len(args) == 1 and isinstance(args[0], str):
                 # Handle simple string input
-                return client.completion(messages=args[0], model=model, **kwargs)
+                return client.completion(messages = args[0],model=model, **kwargs)
             else:
                 # Handle other input types
-                return client.completion(*args, model=model, **kwargs)
+                return client.completion(*args,model=model, **kwargs)
 
         return wrapper
 
@@ -57,26 +55,25 @@ class ServingModel:
         return property(model_property)
 
     # Define model properties using the factory function
-    qwen2p5_p5b = _create_model_property("qwen2.5:0.5b-instruct")
     llama3p2_3b_instruct_q4_K_M = _create_model_property("llama3.2:3b-instruct-q4_K_M")
+    llama3p2_1b_instruct_q4_K_M = _create_model_property("llama3.2:1b-instruct-q4_K_M")
+
+    qwen2p5_0p5b_instruct = _create_model_property("qwen2.5:0.5b-instruct")
+    qwen2p5_3b_instruct = _create_model_property("qwen2.5:3b-instruct")
+    qwen2p5_7b_instruct = _create_model_property("qwen2.5:7b-instruct")
+
     qwen2p5_coder_1p5b_instruct = _create_model_property("qwen2.5-coder:1.5b-instruct")
     qwen2p5_coder_0p5b_instruct = _create_model_property("qwen2.5-coder:0.5b-instruct")
-    llama3p2_latest = _create_model_property("llama3.2:latest")
-    qwen2p5_3b_instruct = _create_model_property("qwen2.5:3b-instruct")
-    qwen2p5_0p5b_instruct = _create_model_property("qwen2.5:0.5b-instruct")
-    exaone3p5_2p4b = _create_model_property("exaone3.5:2.4b")
-    nomic_embed_text_latest = _create_model_property("nomic-embed-text:latest")
-    llama3p2_1b_instruct_q4_K_M = _create_model_property("llama3.2:1b-instruct-q4_K_M")
-    mannix_defog_llama3_sqlcoder_8b_latest = _create_model_property("mannix/defog-llama3-sqlcoder-8b:latest")
+    qwen2p5_coder_7b_instruct = _create_model_property("qwen2.5-coder:7b-instruct")
 
 
 if __name__ == '__main__':
     model = ServingModel()
     _BASE_MODEL= 'qwen2.5:0.5b-instruct'
     # Test CPU usage
-    # print(model.qwen2p5_p5b('what is 2+3?'))
+    print(model.qwen2p5_p5b('what is 2+3?'))
     # Test GPU usage
-    # print(model.qwen2p5_p5b('what is 2+3?', gpu=True))
-    # print(model.completion(model=_BASE_MODEL,
-    #                        messages = "hi"))
-    print(model.llama3p2_1b_instruct_q4_K_M('hi'))
+    print(model.qwen2p5_p5b('what is 2+3?', gpu=True))
+
+    print(model.completion(model=_BASE_MODEL,
+                           messages = "hi"))

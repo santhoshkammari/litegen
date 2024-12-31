@@ -3,8 +3,8 @@ requires = [ "poetry-core",]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "ailite"
-version = "7.0.11"
+name = "litegen"
+version = "0.0.14"
 description = "All popular Framework HF integration kit"
 authors = [ "Kammari Santhosh",]
 readme = "README.md"
@@ -12,10 +12,13 @@ license = "MIT License"
 repository = "https://github.com/santhosh/"
 keywords = [ "",]
 [[tool.poetry.packages]]
-include = "ailite"
+include = "litegen"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-langchain_ollama = "^0.2.2"
+langchain_core = "^0.3.28"
 wordllama = "^0.3.7"
 visionlite = "^0.1.58"
+pypdf2 = "^3.0.1"
+surya_ocr = "^0.8.2"
+openai = "^1.58.1"

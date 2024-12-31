@@ -44,7 +44,7 @@ sleep 2
 
 # Update local installation
 echo -e "\n${GREEN}4. Updating local installation...${NC}"
-uv pip install -U ailite
+uv pip install -U litegen
 
 echo -e "\n${BLUE}Process completed successfully!${NC}"
 
@@ -52,6 +52,6 @@ echo -e "\n${GREEN}Waiting for PyPI to process the new version...${NC}"
 sleep 2
 # Update local installation
 echo -e "\n${GREEN}4. Updating local installation...${NC}"
-uv pip install -U ailite
+uv pip install -U litegen
 
 echo -e "\n${BLUE}Process completed successfully!${NC}"

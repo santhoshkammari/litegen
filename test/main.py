@@ -1,10 +1,3 @@
-from ailite.model import completion
-from ailite.model._oai import OmniLLMClient
+from litegen.utils import surya_ocr_server
 
-client = OmniLLMClient(gpu=True)
-completion = client.completion
-
-
-print(completion(model='qwen2.5:0.5b-instruct',
-                 messages='hi, what is weather today in gurgaon',
-                 ))
+surya_ocr_server(port=8001)

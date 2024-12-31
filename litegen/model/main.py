@@ -1,8 +1,10 @@
 #ailite/model/main.py
 from typing import Optional, Dict, List
-from ailite.model._oai import OmniLLMClient
+from litegen.model._oai import OmniLLMClient
+from litegen.model._serving_models import ServingModel
 
 __client = None
+genai = ServingModel()
 
 def get_client():
     global __client
@@ -37,3 +39,5 @@ def lazy_completion(
         tools=tools,
         **kwargs
     )
+
+
