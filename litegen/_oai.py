@@ -4,19 +4,17 @@ import os
 
 from openai import OpenAI
 from typing import Optional, List, Dict, Literal
-from langchain_core.utils.function_calling import convert_to_openai_function
-
+from ollama._utils import convert_function_to_tool
 
 
 class OmniLLMClient:
     def __init__(
         self,
         api_key: str = 'ollama',
-        base_url: str = "http://localhost:11434/v1",
-        gpu: bool = False
+        base_url: str = None
     ):
-        self.base_url = self._get_base_url(api_key, base_url, gpu)
         self.api_key = self._get_api_key(api_key)
+        self.base_url = self._get_base_url(self.api_key, base_url)
         self.client = OpenAI(base_url=self.base_url, api_key=api_key)
 
     @staticmethod
@@ -45,7 +43,7 @@ class OmniLLMClient:
     def completion(
         self,
         messages: Optional[List[Dict[str, str]]] | str = None,
-        model: str=None,
+        model: str = None,
         system_prompt: str = "You are helpful Assistant",
         prompt: str = "",
         context: Optional[List[Dict[str, str]]] = None,
@@ -63,7 +61,7 @@ class OmniLLMClient:
         elif isinstance(messages, str):
             messages = self.handle_str_messages(messages, system_prompt)
 
-        #Prepare Tools for Calling
+        # Prepare Tools for Calling
         if tools:
             tools = self._prepare_tools(tools)
 
@@ -95,12 +93,16 @@ class OmniLLMClient:
         """Handle string messages and build them into a list of messages."""
         return [{"role": "system", "content": system_prompt}, {"role": "user", "content": messages}]
 
-    def _get_base_url(self, api_key, base_url, gpu):
-        match (gpu, api_key):
-            case (True, _):
+    def _get_base_url(self, api_key, base_url):
+        if os.environ.get('OPENAI_BASE_URL', None): return os.environ['OPENAI_BASE_URL']
+        if base_url: return base_url
+        match api_key:
+            case 'dsollama':
                 return "http://192.168.170.76:11434/v1"
-            case (False, 'ollama'):
-                return "http://localhost:11434/v1" if os.environ.get('OPENAI_API_KEY',None)!='huggingchat' else "http://localhost:11437/v1"
+            case 'ollama':
+                return "http://localhost:11434/v1"
+            case 'huggingchat':
+                return "http://localhost:11437/v1"
             case _:
                 return None
 
@@ -111,5 +113,5 @@ class OmniLLMClient:
         return api_key
 
     def _prepare_tools(self, tools):
-        return [t if isinstance(t,dict) else convert_to_openai_function(t) for t in tools]
-
+        tools = [t if isinstance(t, dict) else convert_function_to_tool(t) for t in tools]
+        return tools

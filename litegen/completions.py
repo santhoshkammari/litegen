@@ -6,10 +6,10 @@ from litegen._types import ModelType
 __client = None
 
 
-def get_client(gpu=False):
+def get_client():
     global __client
     if __client is None:
-        __client = OmniLLMClient(gpu=gpu)
+        __client = OmniLLMClient()
     return __client
 
 
@@ -26,7 +26,7 @@ def lazy_completion(
     tools=None,
     **kwargs
 ):
-    client = get_client(kwargs.pop('gpu',False))
+    client = get_client()
     return client.completion(
         model=model,
         messages=messages,
@@ -54,7 +54,7 @@ def genai(
     tools=None,
     **kwargs
 ):
-    client = get_client(kwargs.pop('gpu',False))
+    client = get_client()
     return client.completion(
         model=model,
         messages=messages,
@@ -84,7 +84,7 @@ def print_stream_completion(
     tools=None,
     **kwargs
 ):
-    client = get_client(kwargs.pop('gpu',False))
+    client = get_client()
     res = client.completion(
         model=model,
         messages=messages,
