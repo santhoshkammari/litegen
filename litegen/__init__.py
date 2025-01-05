@@ -1,1 +1,4 @@
-from .model import completion,pp_completion
+from .completions import (
+lazy_completion as completion,
+print_stream_completion as pp_completion
+)

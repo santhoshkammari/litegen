@@ -1,7 +1,7 @@
 # ailite/model/main.py
 from typing import Optional, Dict, List
-from litegen.model._oai import OmniLLMClient
-from litegen.model._types import ModelType
+from litegen._oai import OmniLLMClient
+from litegen._types import ModelType
 
 __client = None
 

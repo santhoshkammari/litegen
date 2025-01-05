@@ -1,7 +1,8 @@
-from litegen import completion
+from litegen import pp_completion
 
-res = completion(model='exaone3.5:2.4b',
-                 messages="tell me about narendra modi in 5 paragrapsh simple",
-                 gpu=True)
+pp_completion(model='smollm2:135m-instruct-q4_K_M',
+                 messages="tell me about narendra modi in 5 paragrapsh simple")
 
-print(res.choices[0].message.content)
+# from browserlite import genai
+#
+# print(genai('what is 2-4?'))

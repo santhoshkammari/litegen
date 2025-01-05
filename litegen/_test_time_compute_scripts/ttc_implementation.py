@@ -1,6 +1,5 @@
 import asyncio
 from collections import defaultdict
-from concurrent.futures.thread import ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import Callable, Literal
 
@@ -65,7 +64,7 @@ if __name__ == '__main__':
         model='llama3.2:1b-instruct-fp16',
         system_prompt='You are mathematics expert, solve the problem and return answer directly'
     )
-    from litegen.model._oai import OmniLLMClient
+    from litegen._oai import OmniLLMClient
 
     genai = OmniLLMClient(gpu=True).completion
 
