@@ -18,6 +18,16 @@ ModelType = Literal[
     "llama3.2:1b-instruct-fp16",
     "llama3.2:3b-instruct-q4_K_M",
     "llama3.2:3b-instruct-fp16",
+    "Qwen/Qwen2.5-Coder-32B-Instruct",
+    "Qwen/Qwen2.5-72B-Instruct",
+    "meta-llama/Llama-3.3-70B-Instruct",
+    "CohereForAI/c4ai-command-r-plus-08-2024",
+    "Qwen/QwQ-32B-Preview",
+    "nvidia/Llama-3.1-Nemotron-70B-Instruct-HF",
+    "meta-llama/Llama-3.2-11B-Vision-Instruct",
+    "NousResearch/Hermes-3-Llama-3.1-8B",
+    "mistralai/Mistral-Nemo-Instruct-2407",
+    "microsoft/Phi-3.5-mini-instruct",
     "exaone3.5:2.4b",
     "gpt-4o-mini"
 ]

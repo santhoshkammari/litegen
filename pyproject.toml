@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "litegen"
-version = "0.0.18"
+version = "0.0.21"
 description = "All popular Framework HF integration kit"
 authors = [ "Kammari Santhosh",]
 readme = "README.md"
@@ -16,9 +16,5 @@ include = "litegen"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-langchain_core = "^0.3.28"
-wordllama = "^0.3.7"
-visionlite = "^0.1.58"
-pypdf2 = "^3.0.1"
-surya_ocr = "^0.8.2"
 openai = "^1.58.1"
+ollama = "^0.4.5"
