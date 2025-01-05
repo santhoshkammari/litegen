@@ -41,6 +41,34 @@ def lazy_completion(
         **kwargs
     )
 
+def genai(
+    model: ModelType,
+    messages: Optional[List[Dict[str, str]]] | str = None,
+    system_prompt: str = "You are helpful Assistant",
+    prompt: str = "",
+    context: Optional[List[Dict[str, str]]] = None,
+    temperature: Optional[float] = None,
+    max_tokens: Optional[int] = None,
+    stream: bool = False,
+    stop: Optional[List[str]] = None,
+    tools=None,
+    **kwargs
+):
+    client = get_client(kwargs.pop('gpu',False))
+    return client.completion(
+        model=model,
+        messages=messages,
+        system_prompt=system_prompt,
+        prompt=prompt,
+        context=context,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        stream=stream,
+        stop=stop,
+        tools=tools,
+        **kwargs
+    ).choices[0].message.content
+
 
 
 def print_stream_completion(

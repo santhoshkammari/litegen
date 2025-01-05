@@ -100,7 +100,7 @@ class OmniLLMClient:
             case (True, _):
                 return "http://192.168.170.76:11434/v1"
             case (False, 'ollama'):
-                return "http://localhost:11434/v1"
+                return "http://localhost:11434/v1" if os.environ.get('OPENAI_API_KEY',None)!='huggingchat' else "http://localhost:11437/v1"
             case _:
                 return None
 
