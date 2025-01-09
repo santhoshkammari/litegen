@@ -14,8 +14,8 @@ def get_client():
 
 
 def lazy_completion(
-    model: ModelType,
     messages: Optional[List[Dict[str, str]]] | str = None,
+    model: ModelType = None,
     system_prompt: str = "You are helpful Assistant",
     prompt: str = "",
     context: Optional[List[Dict[str, str]]] = None,
@@ -42,8 +42,8 @@ def lazy_completion(
     )
 
 def genai(
-    model: ModelType,
     messages: Optional[List[Dict[str, str]]] | str = None,
+    model: ModelType = None,
     system_prompt: str = "You are helpful Assistant",
     prompt: str = "",
     context: Optional[List[Dict[str, str]]] = None,

@@ -1,17 +1,27 @@
-from litegen import genai, completion
 import os
 
-os.environ['OPENAI_BASE_URL'] = 'http://192.168.170.76:11434/v1'
+from litegen.utils import get_func_from_response
+from litegen import genai, completion
 
-def get_weather(city:str) -> str:
+os.environ['OPENAI_BASE_URL'] = 'http://192.168.170.76:11434/v1'
+os.environ['OPENAI_MODEL_NAME'] = "llama3.1:8b"
+
+
+def get_weather(city: str) -> str:
     """Get the current weather for a city"""
     return f"its very cool 12 degrer in {city}"
 
-res = completion(model="llama3.2:3b-instruct-fp16",
-            messages="tell me weather in hyderabad",
-            tools=[get_weather]
-                 # tools=tools
-                 )
+def get_joke() -> str:
+    """Get a random joke"""
+    return genai(model="llama3.2:3b-instruct-q4_K_M", prompt="Tell me a joke")
 
-print(res.choices[0].message.tool_calls)
 
+# res = completion(
+#     messages="tell me joke",
+#     tools=[get_weather,get_joke]
+# )
+
+res = genai("tell me a joke")
+print(res)
+
+# print(get_func_from_response(res))

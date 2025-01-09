@@ -56,6 +56,11 @@ class OmniLLMClient:
     ):
         """Create a chat completion with either messages or individual components."""
         # If messages not provided, build from components
+        if model is None:
+            model = os.environ.get('OPENAI_MODEL_NAME')
+            if model is None:
+                raise ValueError("Missing required environment variable: OPENAI_MODEL_NAME or pass model")
+
         if messages is None:
             messages = self.build_messages(system_prompt, prompt, context)
         elif isinstance(messages, str):
