@@ -7,6 +7,7 @@ import os
 from openai import OpenAI
 from openai.types.chat import ChatCompletion
 from ._agent_utils import convert_function_to_tool
+from ._types import ModelType
 
 
 @dataclass
@@ -90,13 +91,55 @@ class BaseAgent(ABC):
         """Run the agent with a message"""
         pass
 
-    def __call__(self, message: str, **kwargs) -> AgentResponse:
-        """Synchronous wrapper for run()"""
+    async def batch(self, messages: List[str], **kwargs) -> List[AgentResponse]:
+        """Process multiple messages in parallel and return their responses
+
+        Args:
+            messages: List of messages to process
+            **kwargs: Additional keyword arguments passed to run()
+
+        Returns:
+            List of AgentResponse objects in the same order as input messages
+        """
+        # Create tasks for all messages
+        tasks = [
+            self.run(message, **kwargs)
+            for message in messages
+        ]
+
+        # Run all tasks in parallel and wait for completion
+        responses = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # Handle any exceptions and convert to AgentResponse
+        results: List[AgentResponse] = []
+        for response in responses:
+            if isinstance(response, Exception):
+                # Convert exception to failed AgentResponse
+                results.append(AgentResponse(
+                    content=f"Error processing message: {str(response)}",
+                    raw_response=None,
+                    usage=None
+                ))
+            else:
+                results.append(response)
+
+        return results
+
+    def __call__(self, message: Union[str, List[str]], **kwargs) -> Union[AgentResponse, List[AgentResponse]]:
+        """Enhanced synchronous wrapper that handles both single messages and batches"""
         try:
             loop = asyncio.get_running_loop()
-            return self.run(message, **kwargs) if loop.is_running() else loop.run_until_complete(
-                self.run(message, **kwargs))
+            if loop.is_running():
+                if isinstance(message, list):
+                    return self.batch(message, **kwargs)
+                return self.run(message, **kwargs)
+            else:
+                if isinstance(message, list):
+                    return loop.run_until_complete(self.batch(message, **kwargs))
+                return loop.run_until_complete(self.run(message, **kwargs))
         except RuntimeError:
+            if isinstance(message, list):
+                return asyncio.run(self.batch(message, **kwargs))
             return asyncio.run(self.run(message, **kwargs))
 
     def register_tool(self, func: Union[Callable, List[Callable]]) -> 'BaseAgent':
@@ -123,7 +166,7 @@ class Agent(BaseAgent):
         self,
         system_prompt: Optional[str] = None,
         name: Optional[str] = None,
-        model: Optional[str] = None,
+        model: Optional[ModelType] = None,
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
         model_client: Optional[ModelClient] = None,

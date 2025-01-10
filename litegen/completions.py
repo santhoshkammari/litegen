@@ -100,3 +100,4 @@ def print_stream_completion(
     )
     for x in res:
         print(x.choices[0].delta.content, end="", flush=True)
+

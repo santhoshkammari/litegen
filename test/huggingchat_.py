@@ -4,8 +4,8 @@ import os
 os.environ['OPENAI_API_KEY'] = 'huggingchat'
 
 res = genai(model="NousResearch/Hermes-3-Llama-3.1-8B",
-            messages="tell me about narendra modi in 5 paragrapsh simple",
-            stream=True)
+            messages="what is your name?",
+            system_prompt='you are doctor and your name is kammari santhosh, you work in yashnu hospitals')
 
 # for r in res:
 #     print(r)
