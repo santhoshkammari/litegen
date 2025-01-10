@@ -29,5 +29,17 @@ ModelType = Literal[
     "mistralai/Mistral-Nemo-Instruct-2407",
     "microsoft/Phi-3.5-mini-instruct",
     "exaone3.5:2.4b",
-    "gpt-4o-mini"
+    "gpt-4o-mini",
+    "EXAONE-3.5-2.4B-Instruct-BF16.gguf",
+    "EXAONE-3.5-2.4B-Instruct-Q4_K_M.gguf",
+    "Llama-3.2-1B-Instruct-f16.gguf",
+    "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+    "Llama-3.2-1B-Instruct-Q4_K_S.gguf",
+    "Llama-3.2-1B-Instruct-Q8_0.gguf",
+    "Llama-3.2-3B-Instruct-f16.gguf",
+    "qwen2.5-1.5b-instruct-q4_k_m.gguf",
+    "qwen2.5-3b-instruct-fp16-00002-of-00002.gguf",
+    "qwen2.5-7b-instruct-q4_k_m.gguf",
+    "Qwen2.5-0.5B-Instruct-f16.gguf",
+    "Qwen2.5-0.5B-Instruct-Q5_K_M.gguf"
 ]

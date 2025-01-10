@@ -108,6 +108,8 @@ class OmniLLMClient:
                 return "http://localhost:11434/v1"
             case 'huggingchat':
                 return "http://localhost:11437/v1"
+            case 'llamacpp':
+                return "http://localhost:11438/v1"
             case _:
                 return None
 
