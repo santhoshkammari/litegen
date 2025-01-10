@@ -33,7 +33,8 @@ class ModelClient:
     BASE_URLS = {
         'ollama': 'http://localhost:11434/v1',
         'dsollama': 'http://192.168.170.76:11434/v1',
-        'huggingchat': 'http://localhost:11437/v1'
+        'huggingchat': 'http://localhost:11437/v1',
+        'llamacpp': 'http://localhost:11438/v1'
     }
 
     def __init__(
