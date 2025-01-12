@@ -4,12 +4,16 @@ from litegen._oai import OmniLLMClient
 from litegen._types import ModelType
 
 __client = None
+__api_key = None
+__base_url = None
 
 
 def get_client():
-    global __client
-    if __client is None:
+    global __client, __api_key, __base_url
+    if __client is None or __client.api_key != __api_key or __client.base_url != __base_url:
         __client = OmniLLMClient()
+        __api_key = __client.api_key
+        __base_url = __client.base_url
     return __client
 
 
@@ -41,6 +45,7 @@ def lazy_completion(
         **kwargs
     )
 
+
 def genai(
     messages: Optional[List[Dict[str, str]]] | str = None,
     model: ModelType = None,
@@ -68,7 +73,6 @@ def genai(
         tools=tools,
         **kwargs
     ).choices[0].message.content
-
 
 
 def print_stream_completion(
@@ -100,4 +104,3 @@ def print_stream_completion(
     )
     for x in res:
         print(x.choices[0].delta.content, end="", flush=True)
-
