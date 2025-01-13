@@ -4,15 +4,19 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "litegen"
-version = "0.0.30"
+version = "0.0.32"
 description = "All popular Framework HF integration kit"
 authors = [ "Kammari Santhosh",]
 readme = "README.md"
 license = "MIT License"
 repository = "https://github.com/santhosh/"
 keywords = [ "",]
+include = [ "stapp_run.py", "trace_stapp.py",]
 [[tool.poetry.packages]]
 include = "litegen"
+
+[tool.poetry.scripts]
+trace-ui = "stapp_run:run_app"
 
 [tool.poetry.dependencies]
 python = "^3.10"
