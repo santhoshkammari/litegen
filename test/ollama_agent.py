@@ -1,8 +1,9 @@
 from litegen import Agent
-import os
+from litegen.trace_llm import TraceLLM
+llm_tracer = TraceLLM()
+llm_tracer.set_experiment("dummy")
 
-# os.environ['OPENAI_API_KEY'] = 'ollama'
-
-agent = Agent(model='smollm2:135m-instruct-q4_K_M')
+agent = Agent(model='smollm2:135m-instruct-q4_K_M',
+              llm_tracer=llm_tracer)
 
 print(agent('hai'))

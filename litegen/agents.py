@@ -1,3 +1,4 @@
+import uuid
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Any, Union, Sequence, Callable
 from abc import ABC, abstractmethod
@@ -8,6 +9,14 @@ from openai import OpenAI
 from openai.types.chat import ChatCompletion
 from ._agent_utils import convert_function_to_tool
 from ._types import ModelType
+from .trace_llm import TraceLLM
+
+_llm_tracer: TraceLLM | None = None
+
+
+def set_llm_tracer(llm_tracer):
+    global _llm_tracer
+    _llm_tracer = llm_tracer
 
 
 @dataclass
@@ -27,6 +36,18 @@ class AgentResponse:
     usage: Optional[Dict] = None
 
 
+def trace_if_enabled(func):
+    """Decorator that only traces if a tracer is set"""
+
+    async def wrapper(self, *args, **kwargs):
+        if self.llm_tracer:
+            traced_func = self.llm_tracer.openai_autolog()(func)
+            return await traced_func(self, *args, **kwargs)
+        return await func(self, *args, **kwargs)
+
+    return wrapper
+
+
 class ModelClient:
     """Base model client wrapper for OpenAI"""
 
@@ -43,6 +64,7 @@ class ModelClient:
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
         model_info: Optional[ModelInfo] = None,
+        llm_tracer=None,
         **kwargs
     ):
         self.model = model or os.getenv('OPENAI_MODEL_NAME')
@@ -50,7 +72,9 @@ class ModelClient:
         self.base_url = base_url or os.getenv('OPENAI_BASE_URL') or self.BASE_URLS.get(self.api_key)
         self.model_info = model_info or ModelInfo()
         self.client = OpenAI(api_key=self.api_key, base_url=self.base_url, **kwargs)
+        self.llm_tracer = llm_tracer
 
+    @trace_if_enabled
     async def create(self, messages: List[Dict], **kwargs) -> ChatCompletion:
         """Create a chat completion using OpenAI's format"""
         if tools := kwargs.get('tools'):
@@ -59,8 +83,13 @@ class ModelClient:
                 for f in tools
             ]
 
+        if kwargs.pop('response_format', None):
+            func = self.client.beta.chat.completions.parse
+        else:
+            func = self.client.chat.completions.create
+
         return await asyncio.to_thread(
-            self.client.chat.completions.create,
+            func,
             model=self.model,
             messages=messages,
             **kwargs
@@ -171,11 +200,14 @@ class Agent(BaseAgent):
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
         model_client: Optional[ModelClient] = None,
+        llm_tracer: TraceLLM | None = None,
         **kwargs
     ):
+        self.hit_id = 1
         super().__init__(
             name=name,
             model_client=model_client or ModelClient(
+                llm_tracer=llm_tracer,
                 model=model,
                 api_key=api_key,
                 base_url=base_url,
@@ -184,12 +216,22 @@ class Agent(BaseAgent):
             system_prompt=system_prompt,
         )
 
-    async def run(self, message: str, **kwargs) -> AgentResponse:
+    async def run(self, messages: str | List, **kwargs) -> AgentResponse:
         """Run the agent with a message"""
-        self.conversation_history.append({
-            "role": "user",
-            "content": message
-        })
+
+        trace_id = kwargs.pop('trace_id', None)
+        kwargs['trace_id'] = trace_id or f"Agent: {self.name}, Hit: {self.hit_id}"
+        self.hit_id += 1
+
+        kwargs['trace_extra_info'] = kwargs.pop('trace_extra_info', [])
+
+        if isinstance(messages, str):
+            self.conversation_history.append({
+                "role": "user",
+                "content": messages
+            })
+        else:
+            self.conversation_history = messages
 
         tools = [*kwargs.pop('tools', []), *self.registered_tools]
         response = await self.client.create(
