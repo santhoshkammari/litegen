@@ -26,7 +26,7 @@ def load_traces(experiment):
                 traces.append(json.load(f))
         except Exception as e:
             st.error(f"Error loading {trace_file}: {str(e)}")
-    return traces
+    return sorted(traces,key=lambda x:x['timestamp'])
 
 
 def render_message(role: str, content: str, render_system_prompt: bool = True):
@@ -143,12 +143,14 @@ def main():
         max_duration = st.session_state.get("max_duration", 5.0)
         status_filter = st.session_state.get("status_filter", ["success"])
 
-        filtered_traces = [
-            t for t in traces
-            if (t.get('outputs', {}).get('response', {}).get('usage', {}).get('total_tokens', 0) >= min_tokens and
-                t.get('duration', 0) <= max_duration and
-                t.get('status') in status_filter)
-        ]
+        # filtered_traces = [
+        #     t for t in traces
+        #     if (t.get('outputs', {}).get('response', {}).get('usage', {}).get('total_tokens', 0) >= min_tokens and
+        #         t.get('duration', 0) <= max_duration and
+        #         t.get('status') in status_filter)
+        # ]
+
+        filtered_traces = list(traces)
 
         for trace in filtered_traces:
             with st.expander(f"{trace['trace_id']}", expanded=False):

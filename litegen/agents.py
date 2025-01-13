@@ -1,3 +1,4 @@
+import datetime
 import uuid
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Any, Union, Sequence, Callable
@@ -72,7 +73,18 @@ class ModelClient:
         self.base_url = base_url or os.getenv('OPENAI_BASE_URL') or self.BASE_URLS.get(self.api_key)
         self.model_info = model_info or ModelInfo()
         self.client = OpenAI(api_key=self.api_key, base_url=self.base_url, **kwargs)
-        self.llm_tracer = llm_tracer
+        self.base_tracer_id = f"{self.api_key}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4()}"
+        self.llm_tracer = self.get_tracing(llm_tracer)
+
+
+    def get_tracing(self, llm_tracer):
+        if os.environ.get("OPENAI_TRACING", 'true').lower()=='true':
+            if llm_tracer is None:
+                llm_tracer = TraceLLM()
+                llm_tracer.set_experiment(self.base_tracer_id)
+            return llm_tracer
+        else:
+            return None
 
     @trace_if_enabled
     async def create(self, messages: List[Dict], **kwargs) -> ChatCompletion:
@@ -82,6 +94,10 @@ class ModelClient:
                 convert_function_to_tool(f) if callable(f) else f
                 for f in tools
             ]
+        if 'trace_id' in kwargs:
+            kwargs.pop("trace_id")
+        if 'trace_extra_info' in kwargs:
+            kwargs.pop("trace_extra_info")
 
         if kwargs.pop('response_format', None):
             func = self.client.beta.chat.completions.parse
@@ -104,13 +120,16 @@ class BaseAgent(ABC):
         model_client: ModelClient,
         system_prompt: Optional[str] = None,
         name: Optional[str] = None,
+        enable_conversation: Optional[bool] = None
     ):
         self.name = name
         self.client = model_client
         self.conversation_history: List[Dict] = []
         self.registered_tools: List[Any] = []
+        self.system_prompt = system_prompt
+        self.enable_conversation = enable_conversation
 
-        if system_prompt:
+        if system_prompt and enable_conversation:
             self.conversation_history.append({
                 "role": "system",
                 "content": system_prompt
@@ -206,6 +225,8 @@ class Agent(BaseAgent):
         self.hit_id = 1
         super().__init__(
             name=name,
+            system_prompt=system_prompt,
+            enable_conversation=kwargs.pop('enable_conversation', None),
             model_client=model_client or ModelClient(
                 llm_tracer=llm_tracer,
                 model=model,
@@ -213,14 +234,14 @@ class Agent(BaseAgent):
                 base_url=base_url,
                 **kwargs
             ),
-            system_prompt=system_prompt,
         )
 
     async def run(self, messages: str | List, **kwargs) -> AgentResponse:
         """Run the agent with a message"""
 
         trace_id = kwargs.pop('trace_id', None)
-        kwargs['trace_id'] = trace_id or f"Agent: {self.name}, Hit: {self.hit_id}"
+        name_default = self.name or 'default'
+        kwargs['trace_id'] = trace_id or f"Agent: {name_default}, Hit: {self.hit_id}"
         self.hit_id += 1
 
         kwargs['trace_extra_info'] = kwargs.pop('trace_extra_info', [])
@@ -230,21 +251,26 @@ class Agent(BaseAgent):
                 "role": "user",
                 "content": messages
             })
-        else:
-            self.conversation_history = messages
+            messages = [{"role": "user", "content": messages}]
+
+        if self.system_prompt:
+            self.conversation_history = [{"role": "system", "content": self.system_prompt}] + self.conversation_history
+            messages = [{"role": "system", "content": self.system_prompt}] + messages
 
         tools = [*kwargs.pop('tools', []), *self.registered_tools]
         response = await self.client.create(
-            messages=self.conversation_history,
+            messages=self.conversation_history if self.enable_conversation else messages,
             tools=tools,
             **kwargs
         )
 
         assistant_message = response.choices[0].message.content
-        self.conversation_history.append({
-            "role": "assistant",
-            "content": assistant_message
-        })
+
+        if self.enable_conversation:
+            self.conversation_history.append({
+                "role": "assistant",
+                "content": assistant_message
+            })
 
         return AgentResponse(
             content=assistant_message,

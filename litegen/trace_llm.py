@@ -1,4 +1,5 @@
 import json
+import os
 import time
 import uuid
 from datetime import datetime
@@ -19,8 +20,7 @@ class TraceLLM:
 
     def __init__(self):
         if not hasattr(self, 'initialized'):
-            self.storage_dir = Path("traces")
-            self.storage_dir.mkdir(exist_ok=True)
+            self.build_storage_dir()
             self.current_experiment = "default"
             self._local = threading.local()
             self.initialized = True
@@ -96,9 +96,10 @@ class TraceLLM:
 
     def set_experiment(self, experiment_name: str):
         """Set the current experiment name"""
-        self.current_experiment = experiment_name
-        exp_dir = self.storage_dir / experiment_name
-        exp_dir.mkdir(exist_ok=True)
+        if os.environ.get("OPENAI_TRACING","true") == "true":
+            self.current_experiment = experiment_name
+            exp_dir = self.storage_dir / experiment_name
+            exp_dir.mkdir(exist_ok=True)
 
     def _save_trace(self, trace: Dict[str, Any]):
         """Save trace to storage with safe file writing"""
@@ -147,3 +148,8 @@ class TraceLLM:
                             json.load(f)  # Try to parse JSON
                     except json.JSONDecodeError:
                         trace_file.unlink()  # Delete corrupted file
+
+    def build_storage_dir(self):
+        if os.environ.get("OPENAI_TRACING","true") == "true":
+            self.storage_dir = Path("traces")
+            self.storage_dir.mkdir(exist_ok=True)

@@ -1,19 +1,16 @@
-import time
-
+import os
 from litegen import Agent
-from litegen.trace_llm import TraceLLM
 
-llm_tracer = TraceLLM()
-llm_tracer.set_experiment('Qwen2.5')
+# from litegen.trace_llm import TraceLLM
+# llm_tracer = TraceLLM()
+# llm_tracer.set_experiment('Qwen2.6')
 
-agent = Agent(model='qwen2.5:0.5b-instruct',
-              llm_tracer=llm_tracer,
-              name='DoctorQwen')
 
-agent("what is 2+3?")
-time.sleep(5)
-agent("what is 4+5")
-time.sleep(5)
-agent("what is 6+7")
-time.sleep(5)
+os.environ['OPENAI_API_KEY'] = 'huggingchat'
+os.environ['OPENAI_TRACING'] = 'true'
 
+agent = Agent(model='microsoft/Phi-3.5-mini-instruct')
+
+res = agent("tell me about modi in 100 words")
+
+print(res.content)
