@@ -78,7 +78,7 @@ class ModelClient:
 
 
     def get_tracing(self, llm_tracer):
-        if os.environ.get("OPENAI_TRACING", 'true').lower()=='true':
+        if os.environ.get("OPENAI_TRACING", 'false').lower()=='true':
             if llm_tracer is None:
                 llm_tracer = TraceLLM()
                 llm_tracer.set_experiment(self.base_tracer_id)
