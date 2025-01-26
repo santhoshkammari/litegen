@@ -20,7 +20,7 @@ def get_client():
 def lazy_completion(
     messages: Optional[List[Dict[str, str]]] | str = None,
     model: ModelType = None,
-    system_prompt: str = "You are helpful Assistant",
+    system_prompt: str = None,
     prompt: str = "",
     context: Optional[List[Dict[str, str]]] = None,
     temperature: Optional[float] = None,
@@ -49,7 +49,7 @@ def lazy_completion(
 def genai(
     messages: Optional[List[Dict[str, str]]] | str = None,
     model: ModelType = None,
-    system_prompt: str = "You are helpful Assistant",
+    system_prompt: str = None,
     prompt: str = "",
     context: Optional[List[Dict[str, str]]] = None,
     temperature: Optional[float] = None,
@@ -78,7 +78,7 @@ def genai(
 def print_stream_completion(
     model: ModelType,
     messages: Optional[List[Dict[str, str]]] | str = None,
-    system_prompt: str = "You are helpful Assistant",
+    system_prompt: str = None,
     prompt: str = "",
     context: Optional[List[Dict[str, str]]] = None,
     temperature: Optional[float] = None,

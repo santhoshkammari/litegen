@@ -19,7 +19,7 @@ class OmniLLMClient:
 
     @staticmethod
     def build_messages(
-        system_prompt: str = "",
+        system_prompt: str = None,
         prompt: str = "",
         context: Optional[List[Dict[str, str]]] = None
     ) -> List[Dict[str, str]]:
@@ -44,7 +44,7 @@ class OmniLLMClient:
         self,
         messages: Optional[List[Dict[str, str]]] | str = None,
         model: str = None,
-        system_prompt: str = "You are helpful Assistant",
+        system_prompt: str = None,
         prompt: str = "",
         context: Optional[List[Dict[str, str]]] = None,
         temperature: Optional[float] = None,
@@ -96,7 +96,13 @@ class OmniLLMClient:
     @staticmethod
     def handle_str_messages(messages, system_prompt):
         """Handle string messages and build them into a list of messages."""
-        return [{"role": "system", "content": system_prompt}, {"role": "user", "content": messages}]
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+
+        messages.append({"role": "user", "content": messages})
+
+        return messages
 
     def _get_base_url(self, api_key, base_url):
         if os.environ.get('OPENAI_BASE_URL', None): return os.environ['OPENAI_BASE_URL']
