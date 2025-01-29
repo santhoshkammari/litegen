@@ -71,16 +71,26 @@ class OmniLLMClient:
             tools = self._prepare_tools(tools)
 
         # Get response from API
-        response = self.client.chat.completions.create(
-            model=model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            stream=stream,
-            stop=stop,
-            tools=tools,
-            **kwargs
-        )
+        if kwargs.get("response_format",None) is None:
+            response = self.client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                stream=stream,
+                stop=stop,
+                tools=tools,
+                **kwargs
+            )
+        else:
+            response = self.client.beta.chat.completions.parse(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                stop=stop,
+                **kwargs
+            )
         return response
 
     def _stream_to_string(self, stream_response):
@@ -96,13 +106,13 @@ class OmniLLMClient:
     @staticmethod
     def handle_str_messages(messages, system_prompt):
         """Handle string messages and build them into a list of messages."""
-        messages = []
+        _messages = []
         if system_prompt:
-            messages.append({"role": "system", "content": system_prompt})
+            _messages.append({"role": "system", "content": system_prompt})
 
-        messages.append({"role": "user", "content": messages})
+        _messages.append({"role": "user", "content": messages})
 
-        return messages
+        return _messages
 
     def _get_base_url(self, api_key, base_url):
         if os.environ.get('OPENAI_BASE_URL', None): return os.environ['OPENAI_BASE_URL']

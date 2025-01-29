@@ -60,7 +60,12 @@ def genai(
     **kwargs
 ):
     client = get_client()
-    return client.completion(
+
+    response_format = kwargs.pop("response_format",None)
+
+    kwargs['response_format']=response_format
+
+    res = client.completion(
         model=model,
         messages=messages,
         system_prompt=system_prompt,
@@ -72,7 +77,11 @@ def genai(
         stop=stop,
         tools=tools,
         **kwargs
-    ).choices[0].message.content
+    )
+    if response_format is None:
+        return res.choices[0].message.content
+    else:
+        return res.choices[0].message.parsed
 
 
 def print_stream_completion(
@@ -104,3 +113,21 @@ def print_stream_completion(
     )
     for x in res:
         print(x.choices[0].delta.content, end="", flush=True)
+
+
+if __name__ == '__main__':
+    import os
+
+    from pydantic import BaseModel
+
+    os.environ['OPENAI_API_KEY'] = "dsollama"
+    os.environ['OPENAI_MODEL_NAME'] = "qwen2.5:7b-instruct"
+    from litegen import genai
+
+
+    class Friend(BaseModel):
+        name: str
+        age: int
+
+
+    print(genai('hi,my friend name is santhosh and age is 23', response_format=Friend))
