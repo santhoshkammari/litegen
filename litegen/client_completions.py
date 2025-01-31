@@ -31,6 +31,7 @@ class LLM:
         self.DEFAULT_MODELS: Dict = {
             "ollama": "qwen2.5:0.5b-instruct",
             "dsollama": "qwen2.5:7b-instruct",
+            "hf": "Qwen/Qwen2.5-Coder-32B-Instruct",
             "huggingchat": "Qwen/Qwen2.5-Coder-32B-Instruct",
             "huggingchat_nemo": "nvidia/Llama-3.1-Nemotron-70B-Instruct-HF",
             "huggingchat_hermes": "NousResearch/Hermes-3-Llama-3.1-8B",
