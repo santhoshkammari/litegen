@@ -24,7 +24,7 @@ class LLM:
         debug: bool = None
     ):
         self.debug: bool | None = debug
-        self._base_api_key = api_key  # just for tracking
+        self._base_api_key = os.environ['OPENAI_API_KEY'] or api_key  # just for tracking
         self.api_key = self._get_api_key(api_key)
         self.base_url = self._get_base_url(self.api_key, base_url)
         self.DEFAULT_MODELS: Dict = {
