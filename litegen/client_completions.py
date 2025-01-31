@@ -1,4 +1,3 @@
-
 import os
 
 from openai import OpenAI
@@ -6,11 +5,20 @@ from typing import Optional, List, Dict, Literal
 from ollama._utils import convert_function_to_tool
 from litegen._types import ModelType
 
+BaseApiKeys = Literal[
+    "ollama",
+    "dsollama",
+    "huggingchat",
+    "huggingchat_nemo",
+    "huggingchat_hermes",
+    "huggingchat_phimini"
+]
+
 
 class LLM:
     def __init__(
         self,
-        api_key: str = 'ollama',
+        api_key: BaseApiKeys | str = 'ollama',
         base_url: str = None,
         debug: bool = None
     ):
@@ -78,13 +86,13 @@ class LLM:
             tools = self._prepare_tools(tools)
 
         if self.debug:
-            print('-'*50)
+            print('-' * 50)
             print(f'{self.api_key=}')
             print(f'{self.base_url=}')
             print(f'{model=}')
             print(f'{messages=}')
             print(f'{tools=}')
-            print('-'*50)
+            print('-' * 50)
 
         # Get response from API
         if kwargs.get("response_format", None) is None:
