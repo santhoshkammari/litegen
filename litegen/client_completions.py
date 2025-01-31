@@ -41,8 +41,8 @@ class LLM:
 
     def _update(self):
         if self._base_api_key == "hf":
-            self.base_url = "https://api-inference.huggingface.co/v1/"
-            self.api_key = "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"
+            self.base_url:str = "https://api-inference.huggingface.co/v1/"
+            self.api_key:str = "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"
 
     @staticmethod
     def build_messages(
