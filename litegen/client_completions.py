@@ -8,6 +8,7 @@ from litegen._types import ModelType
 BaseApiKeys = Literal[
     "ollama",
     "dsollama",
+    "hf",
     "huggingchat",
     "huggingchat_nemo",
     "huggingchat_hermes",
@@ -24,6 +25,7 @@ class LLM:
     ):
         self.debug: bool | None = debug
         self.api_key = self._get_api_key(api_key)
+        self._base_api_key = api_key # just for tracking
         self.base_url = self._get_base_url(self.api_key, base_url)
         self.client = OpenAI(base_url=self.base_url, api_key=api_key)
         self.DEFAULT_MODELS: Dict = {
@@ -34,6 +36,12 @@ class LLM:
             "huggingchat_hermes": "NousResearch/Hermes-3-Llama-3.1-8B",
             "huggingchat_phimini": "microsoft/Phi-3.5-mini-instruct",
         }
+        self._update()
+
+    def _update(self):
+        if self._base_api_key == "hf":
+            self.base_url = "https://api-inference.huggingface.co/v1/",
+            self.api_key = "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"
 
     @staticmethod
     def build_messages(
