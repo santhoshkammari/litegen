@@ -24,8 +24,8 @@ class LLM:
         debug: bool = None
     ):
         self.debug: bool | None = debug
-        self.api_key = self._get_api_key(api_key)
         self._base_api_key = api_key # just for tracking
+        self.api_key = self._get_api_key(api_key)
         self.base_url = self._get_base_url(self.api_key, base_url)
         self.client = OpenAI(base_url=self.base_url, api_key=api_key)
         self.DEFAULT_MODELS: Dict = {
