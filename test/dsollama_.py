@@ -1,10 +1,12 @@
 import random
 
-from litegen import genai
+from litegen import LLM
 import os
 
 # os.environ['OPENAI_BASE_URL'] = 'http://localhost:11434/v1'
 os.environ['OPENAI_API_KEY']  = "huggingchat"
+
+genai = LLM()
 
 query = "train a ml model using sklearn, i want step by step , make it neat, do it step by step each time do one step only, now do one step"
 res = ""

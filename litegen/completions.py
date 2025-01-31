@@ -1,6 +1,6 @@
 # ailite/model/main.py
 from typing import Optional, Dict, List
-from litegen._oai import OmniLLMClient
+from litegen._oai import BaseOmniLLMClient
 from litegen._types import ModelType
 
 __client = None
@@ -11,7 +11,7 @@ __base_url = None
 def get_client():
     global __client, __api_key, __base_url
     if __client is None or __client.api_key != __api_key or __client.base_url != __base_url:
-        __client = OmniLLMClient()
+        __client = BaseOmniLLMClient()
         __api_key = __client.api_key
         __base_url = __client.base_url
     return __client

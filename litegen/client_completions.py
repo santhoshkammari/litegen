@@ -1,21 +1,31 @@
-# ailite/model/_ollama_models.py
 
 import os
 
 from openai import OpenAI
 from typing import Optional, List, Dict, Literal
 from ollama._utils import convert_function_to_tool
+from litegen._types import ModelType
 
 
-class BaseOmniLLMClient:
+class LLM:
     def __init__(
         self,
         api_key: str = 'ollama',
-        base_url: str = None
+        base_url: str = None,
+        debug: bool = None
     ):
+        self.debug: bool | None = debug
         self.api_key = self._get_api_key(api_key)
         self.base_url = self._get_base_url(self.api_key, base_url)
         self.client = OpenAI(base_url=self.base_url, api_key=api_key)
+        self.DEFAULT_MODELS: Dict = {
+            "ollama": "qwen2.5:0.5b-instruct",
+            "dsollama": "qwen2.5:7b-instruct",
+            "huggingchat": "Qwen/Qwen2.5-Coder-32B-Instruct",
+            "huggingchat_nemo": "nvidia/Llama-3.1-Nemotron-70B-Instruct-HF",
+            "huggingchat_hermes": "NousResearch/Hermes-3-Llama-3.1-8B",
+            "huggingchat_phimini": "microsoft/Phi-3.5-mini-instruct",
+        }
 
     @staticmethod
     def build_messages(
@@ -57,10 +67,7 @@ class BaseOmniLLMClient:
         """Create a chat completion with either messages or individual components."""
         # If messages not provided, build from components
         if model is None:
-            model = os.environ.get('OPENAI_MODEL_NAME')
-            if model is None:
-                raise ValueError("Missing required environment variable: OPENAI_MODEL_NAME or pass model")
-
+            model = self._get_model_name()
         if messages is None:
             messages = self.build_messages(system_prompt, prompt, context)
         elif isinstance(messages, str):
@@ -70,8 +77,17 @@ class BaseOmniLLMClient:
         if tools:
             tools = self._prepare_tools(tools)
 
+        if self.debug:
+            print('-'*50)
+            print(f'{self.api_key=}')
+            print(f'{self.base_url=}')
+            print(f'{model=}')
+            print(f'{messages=}')
+            print(f'{tools=}')
+            print('-'*50)
+
         # Get response from API
-        if kwargs.get("response_format",None) is None:
+        if kwargs.get("response_format", None) is None:
             response = self.client.chat.completions.create(
                 model=model,
                 messages=messages,
@@ -117,7 +133,13 @@ class BaseOmniLLMClient:
     def _get_base_url(self, api_key, base_url):
         if os.environ.get('OPENAI_BASE_URL', None): return os.environ['OPENAI_BASE_URL']
         if base_url: return base_url
-        match api_key:
+
+        if 'huggingchat' in api_key:
+            _api_key = "huggingchat"  # huggingchat_code etc..
+        else:
+            _api_key = api_key
+
+        match _api_key:
             case 'dsollama':
                 return "http://192.168.170.76:11434/v1"
             case 'ollama':
@@ -129,7 +151,7 @@ class BaseOmniLLMClient:
             case _:
                 return None
 
-    def _get_api_key(self, api_key: str) -> str:
+    def _get_api_key(self, api_key: str | None = None) -> str:
         _env_api_key = os.environ.get('OPENAI_API_KEY')
         if _env_api_key:
             return _env_api_key
@@ -138,3 +160,83 @@ class BaseOmniLLMClient:
     def _prepare_tools(self, tools):
         tools = [t if isinstance(t, dict) else convert_function_to_tool(t) for t in tools]
         return tools
+
+    def __call__(
+        self,
+        messages: Optional[List[Dict[str, str]]] | str = None,
+        model: ModelType = None,
+        system_prompt: str = None,
+        prompt: str = "",
+        context: Optional[List[Dict[str, str]]] = None,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        stream: bool = False,
+        stop: Optional[List[str]] = None,
+        tools=None,
+        **kwargs
+    ):
+
+        response_format = kwargs.pop("response_format", None)
+        kwargs['response_format'] = response_format
+
+        res = self.completion(
+            model=model,
+            messages=messages,
+            system_prompt=system_prompt,
+            prompt=prompt,
+            context=context,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stream=stream,
+            stop=stop,
+            tools=tools,
+            **kwargs
+        )
+        if response_format is None:
+            return res.choices[0].message.content
+        else:
+            return res.choices[0].message.parsed
+
+    def print_stream_completion(
+        self,
+        model: ModelType,
+        messages: Optional[List[Dict[str, str]]] | str = None,
+        system_prompt: str = None,
+        prompt: str = "",
+        context: Optional[List[Dict[str, str]]] = None,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        stream: bool = False,
+        stop: Optional[List[str]] = None,
+        tools=None,
+        **kwargs
+    ):
+        res = self.completion(
+            model=model,
+            messages=messages,
+            system_prompt=system_prompt,
+            prompt=prompt,
+            context=context,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stream=True,
+            stop=stop,
+            tools=tools,
+            **kwargs
+        )
+        for x in res:
+            print(x.choices[0].delta.content, end="", flush=True)
+
+    def _get_model_name(self):
+        model = os.environ.get('OPENAI_MODEL_NAME')
+        if model is None:
+            print(self.api_key)
+            model = self.DEFAULT_MODELS.get(self.api_key, None)
+            if model is None:
+                raise ValueError("Missing required environment variable: OPENAI_MODEL_NAME or pass model")
+        return model
+
+
+if __name__ == '__main__':
+    llm = LLM()
+    print(llm("hai"))
