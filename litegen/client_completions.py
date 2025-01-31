@@ -8,7 +8,7 @@ from litegen._types import ModelType
 BaseApiKeys = Literal[
     "ollama",
     "dsollama",
-    "hf",
+    "hf_free",
     "huggingchat",
     "huggingchat_nemo",
     "huggingchat_hermes",
@@ -24,25 +24,26 @@ class LLM:
         debug: bool = None
     ):
         self.debug: bool | None = debug
-        self._base_api_key = api_key # just for tracking
+        self._base_api_key = api_key  # just for tracking
         self.api_key = self._get_api_key(api_key)
         self.base_url = self._get_base_url(self.api_key, base_url)
-        self.client = OpenAI(base_url=self.base_url, api_key=api_key)
         self.DEFAULT_MODELS: Dict = {
             "ollama": "qwen2.5:0.5b-instruct",
             "dsollama": "qwen2.5:7b-instruct",
-            "hf": "Qwen/Qwen2.5-Coder-32B-Instruct",
+            "hf_free": "Qwen/Qwen2.5-Coder-32B-Instruct",
             "huggingchat": "Qwen/Qwen2.5-Coder-32B-Instruct",
             "huggingchat_nemo": "nvidia/Llama-3.1-Nemotron-70B-Instruct-HF",
             "huggingchat_hermes": "NousResearch/Hermes-3-Llama-3.1-8B",
             "huggingchat_phimini": "microsoft/Phi-3.5-mini-instruct",
         }
         self._update()
+        self.client = OpenAI(base_url=self.base_url, api_key=self.api_key)
+
 
     def _update(self):
-        if self._base_api_key == "hf":
-            self.base_url:str = "https://api-inference.huggingface.co/v1/"
-            self.api_key:str = "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"
+        if self._base_api_key == "hf_free":
+            self.base_url: str = "https://api-inference.huggingface.co/v1/"
+            self.api_key: str = "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"
 
     @staticmethod
     def build_messages(
@@ -254,5 +255,19 @@ class LLM:
 
 
 if __name__ == '__main__':
-    llm = LLM()
-    print(llm("hai"))
+    from pydantic import BaseModel
+
+    llm = LLM("hf_free")
+
+
+    class Person(BaseModel):
+        name: str
+        age: int
+
+
+    ans = llm(
+        model="Qwen/Qwen2.5-Coder-32B-Instruct",
+        prompt="my name is santhosh and age is 50, return me json"
+    )
+
+    print(ans)
