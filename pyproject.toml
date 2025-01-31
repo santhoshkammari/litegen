@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "litegen"
-version = "0.0.52"
+version = "0.0.53"
 description = "All popular Framework HF integration kit"
 authors = [ "Kammari Santhosh",]
 readme = "README.md"
