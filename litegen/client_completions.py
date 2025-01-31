@@ -230,7 +230,6 @@ class LLM:
     def _get_model_name(self):
         model = os.environ.get('OPENAI_MODEL_NAME')
         if model is None:
-            print(self.api_key)
             model = self.DEFAULT_MODELS.get(self.api_key, None)
             if model is None:
                 raise ValueError("Missing required environment variable: OPENAI_MODEL_NAME or pass model")
