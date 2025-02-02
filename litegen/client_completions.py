@@ -274,7 +274,11 @@ class LLM:
             **kwargs
         )
         if response_format is None:
-            return res.choices[0].message.content
+            try:
+                return res.choices[0].message.content
+            except Exception as e:
+                print(f"Error: {e}")
+                print(f'{res=}')
         else:
             return response_format(**json.loads(self.sanitize_json_string(res.choices[0].message.content)))
 
@@ -318,19 +322,9 @@ class LLM:
 
 
 if __name__ == '__main__':
-    from pydantic import BaseModel
-
-    llm = LLM("hf_free")
-
-
-    class Person(BaseModel):
-        name: str
-        age: int
-
-
-    ans = llm(
-        model="Qwen/Qwen2.5-Coder-32B-Instruct",
-        prompt="my name is santhosh and age is 50, return me json"
+    llm = LLM('huggingchat',debug=True)
+    answer = llm(
+        f"Based on user question: gguf model run  using transformers\n\n and the realtime resutls insgihts : use gguf ml model\n, answer the user question",
+        model='Qwen/Qwen2.5-Coder-32B-Instruct'
     )
-
-    print(ans)
+    print(answer)
