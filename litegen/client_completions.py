@@ -172,6 +172,7 @@ class LLM:
                 return None
 
     def _get_api_key(self, api_key: str | None = None) -> str:
+        if api_key: return api_key
         _env_api_key = os.environ.get('OPENAI_API_KEY')
         if _env_api_key:
             return _env_api_key
