@@ -1,4 +1,6 @@
+import json
 import os
+import re
 
 from openai import OpenAI
 from typing import Optional, List, Dict, Literal
@@ -19,12 +21,12 @@ BaseApiKeys = Literal[
 class LLM:
     def __init__(
         self,
-        api_key: BaseApiKeys | str = 'ollama',
+        api_key: BaseApiKeys | str | None = None,
         base_url: str = None,
         debug: bool = None
     ):
         self.debug: bool | None = debug
-        self._base_api_key = os.environ['OPENAI_API_KEY'] or api_key  # just for tracking
+        self._base_api_key = api_key or os.environ['OPENAI_API_KEY'] # just for tracking
         self.api_key = self._get_api_key(api_key)
         self.base_url = self._get_base_url(self.api_key, base_url)
         self.DEFAULT_MODELS: Dict = {
@@ -38,7 +40,6 @@ class LLM:
         }
         self._update()
         self.client = OpenAI(base_url=self.base_url, api_key=self.api_key)
-
 
     def _update(self):
         if self._base_api_key == "hf_free":
@@ -97,6 +98,7 @@ class LLM:
 
         if self.debug:
             print('-' * 50)
+            print(f'{self._base_api_key=}')
             print(f'{self.api_key=}')
             print(f'{self.base_url=}')
             print(f'{model=}')
@@ -179,6 +181,66 @@ class LLM:
         tools = [t if isinstance(t, dict) else convert_function_to_tool(t) for t in tools]
         return tools
 
+    def sanitize_json_string(self, json_str: str) -> str:
+        """
+        Sanitizes a JSON-like string by handling both Python dict format and JSON format
+        with special handling for code snippets and control characters.
+
+        Args:
+            json_str (str): The input string in either Python dictionary or JSON format
+
+        Returns:
+            str: A properly formatted JSON string
+        """
+        # Remove any leading/trailing whitespace and triple quotes
+        json_str = json_str.strip().strip('"""').strip("'''")
+
+        # Pre-process: convert Python dict style to JSON if needed
+        if json_str.startswith("{'"):  # Python dict style
+            # Handle Python dict-style strings
+            def replace_dict_quotes(match):
+                content = match.group(1)
+                # Escape any double quotes in the content
+                content = content.replace('"', '\\"')
+                return f'"{content}"'
+
+            # Convert Python single-quoted strings to double-quoted
+            pattern = r"'([^'\\]*(?:\\.[^'\\]*)*)'"
+            json_str = re.sub(pattern, replace_dict_quotes, json_str)
+
+            # Handle Python boolean values
+            json_str = json_str.replace("True", "true")
+            json_str = json_str.replace("False", "false")
+
+        # Process code snippets and strings with control characters
+        def escape_special_content(match):
+            content = match.group(1)
+
+            # Handle newlines and control characters
+            if '\n' in content or '\\n' in content:
+                # Properly escape newlines and maintain indentation
+                content = content.replace('\\n', '\n')  # Convert literal \n to newline
+                # Now escape all control characters properly
+                content = json.dumps(content)[1:-1]  # Use json.dumps but remove outer quotes
+
+            return f'"{content}"'
+
+        # Find and process all quoted strings, handling escaped quotes
+        pattern = r'"([^"\\]*(?:\\.[^"\\]*)*)"'
+        processed_str = re.sub(pattern, escape_special_content, json_str)
+
+        try:
+            # Try to parse and re-serialize to ensure valid JSON
+            return json.dumps(json.loads(processed_str))
+        except json.JSONDecodeError as e:
+            # If direct parsing fails, try to fix common issues
+            try:
+                # Try to handle any remaining unescaped control characters
+                cleaned = processed_str.encode('utf-8').decode('unicode-escape')
+                return json.dumps(json.loads(cleaned))
+            except Exception as e:
+                raise ValueError(f"Failed to create valid JSON: {str(e)}")
+
     def __call__(
         self,
         messages: Optional[List[Dict[str, str]]] | str = None,
@@ -213,7 +275,7 @@ class LLM:
         if response_format is None:
             return res.choices[0].message.content
         else:
-            return res.choices[0].message.parsed
+            return response_format(**json.loads(self.sanitize_json_string(res.choices[0].message.content)))
 
     def print_stream_completion(
         self,
