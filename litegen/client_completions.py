@@ -151,7 +151,6 @@ class LLM:
         return _messages
 
     def _get_base_url(self, api_key, base_url):
-        if os.environ.get('OPENAI_BASE_URL', None): return os.environ['OPENAI_BASE_URL']
         if base_url: return base_url
 
         if 'huggingchat' in api_key:
@@ -169,6 +168,7 @@ class LLM:
             case 'llamacpp':
                 return "http://localhost:11438/v1"
             case _:
+                if os.environ.get('OPENAI_BASE_URL', None): return os.environ['OPENAI_BASE_URL']
                 return None
 
     def _get_api_key(self, api_key: str | None = None) -> str:
