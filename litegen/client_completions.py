@@ -5,6 +5,8 @@ import re
 from openai import OpenAI
 from typing import Optional, List, Dict, Literal
 from ollama._utils import convert_function_to_tool
+from pydantic import BaseModel
+
 from litegen._types import ModelType
 
 BaseApiKeys = Literal[
@@ -244,21 +246,29 @@ class LLM:
 
     def __call__(
         self,
+        prompt: str = "",
+        schema:Optional[BaseModel]=None,
         messages: Optional[List[Dict[str, str]]] | str = None,
         model: ModelType = None,
         system_prompt: str = None,
-        prompt: str = "",
         context: Optional[List[Dict[str, str]]] = None,
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
         stream: bool = False,
         stop: Optional[List[str]] = None,
         tools=None,
+        response_format=None,
         **kwargs
     ):
+        if not isinstance(prompt,str) and (prompt and schema is None):
+            schema = prompt
+        if response_format==str:
+            response_format = None
 
-        response_format = kwargs.pop("response_format", None)
-        kwargs['response_format'] = response_format
+        if schema:
+            system_prompt = schema.system_prompt
+            prompt=schema.user_prompt
+            response_format=schema.response_model
 
         res = self.completion(
             model=model,
@@ -271,6 +281,7 @@ class LLM:
             stream=stream,
             stop=stop,
             tools=tools,
+            response_format=response_format,
             **kwargs
         )
         if response_format is None:
@@ -320,6 +331,13 @@ class LLM:
                 raise ValueError("Missing required environment variable: OPENAI_MODEL_NAME or pass model")
         return model
 
+class DSLLM(LLM):
+    def __init__(self,*args,**kwargs):
+        super().__init__(api_key='dsollama',*args,**kwargs)
+
+class HFLLM(LLM):
+    def __init__(self,*args,**kwargs):
+        super().__init__(api_key='huggingchat',*args,**kwargs)
 
 if __name__ == '__main__':
     llm = LLM('huggingchat',debug=True)
