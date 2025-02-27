@@ -7,7 +7,54 @@ from typing import Optional, List, Dict, Literal
 from ollama._utils import convert_function_to_tool
 from pydantic import BaseModel
 
-from litegen._types import ModelType
+from typing import Literal
+
+ModelType = Literal[
+    "smollm2:1.7b-instruct-fp16",
+    "smollm2:135m-instruct-fp16",
+    "smollm2:135m-instruct-q4_K_M",
+    "qwen2.5-coder:1.5b-instruct",
+    "qwen2.5-coder:0.5b-instruct",
+    "qwen2.5:3b-instruct",
+    "qwen2.5:0.5b-instruct",
+    "qwen2.5:1.5b-instruct",
+    "qwen2.5:7b-instruct",
+    "qwen2.5-coder:3b-instruct-q4_k_m",
+    "qwen2.5-coder:7b-instruct",
+    "qwen2.5-coder:14b-instruct-q4_K_M",
+    "qwen2.5-coder:32b-instruct-q4_K_M",
+    "llama3.2:1b-instruct-q4_K_M",
+    "llama3.2:1b-instruct-fp16",
+    "llama3.2:3b-instruct-q4_K_M",
+    "llama3.2:3b-instruct-fp16",
+    "Qwen/Qwen2.5-Coder-32B-Instruct",
+    "Qwen/Qwen2.5-72B-Instruct",
+    "meta-llama/Llama-3.3-70B-Instruct",
+    "CohereForAI/c4ai-command-r-plus-08-2024",
+    "Qwen/QwQ-32B-Preview",
+    "nvidia/Llama-3.1-Nemotron-70B-Instruct-HF",
+    "meta-llama/Llama-3.2-11B-Vision-Instruct",
+    "NousResearch/Hermes-3-Llama-3.1-8B",
+    "mistralai/Mistral-Nemo-Instruct-2407",
+    "microsoft/Phi-3.5-mini-instruct",
+    "exaone3.5:2.4b",
+    "gpt-4o-mini",
+    "gpt-4o",
+    "EXAONE-3.5-2.4B-Instruct-BF16.gguf",
+    "EXAONE-3.5-2.4B-Instruct-Q4_K_M.gguf",
+    "Llama-3.2-1B-Instruct-f16.gguf",
+    "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+    "Llama-3.2-1B-Instruct-Q4_K_S.gguf",
+    "Llama-3.2-1B-Instruct-Q8_0.gguf",
+    "Llama-3.2-3B-Instruct-f16.gguf",
+    "qwen2.5-1.5b-instruct-q4_k_m.gguf",
+    "qwen2.5-3b-instruct-fp16-00002-of-00002.gguf",
+    "qwen2.5-7b-instruct-q4_k_m.gguf",
+    "Qwen2.5-0.5B-Instruct-f16.gguf",
+    "Qwen2.5-0.5B-Instruct-Q5_K_M.gguf",
+    "hf.co/bartowski/DeepSeek-R1-Distill-Qwen-32B-abliterated-GGUF:Q5_K_M",
+    "hf.co/bartowski/DeepSeek-R1-Distill-Qwen-14B-GGUF:Q5_K_M"
+]
 
 BaseApiKeys = Literal[
     "ollama",
@@ -340,9 +387,44 @@ class HFLLM(LLM):
         super().__init__(api_key='huggingchat',*args,**kwargs)
 
 if __name__ == '__main__':
-    llm = LLM('huggingchat',debug=True)
-    answer = llm(
-        f"Based on user question: gguf model run  using transformers\n\n and the realtime resutls insgihts : use gguf ml model\n, answer the user question",
-        model='Qwen/Qwen2.5-Coder-32B-Instruct'
-    )
+    llm = DSLLM()
+    answer = llm(prompt="hi, tell me a joke")
     print(answer)
+
+    ## Structure response example
+
+    from litegen import DSLLM
+    from pydantic import BaseModel
+    from liteauto import google
+
+
+    def get_google_result(query) -> list[dict]:
+        res = google(query, max_urls=10, advanced=True)
+        return [
+            {"url": r.url, "title": r.title, "description": r.description}
+            for r in res
+        ]
+
+
+    def get_wikipedia_result(query) -> list[dict]:
+        res = google(query + " wikipedia", max_urls=10, advanced=True)
+        return [
+            {"url": r.url, "title": r.title, "description": r.description}
+            for r in res
+        ]
+
+
+    class Person(BaseModel):
+        name: str
+
+
+    class IntentGenSchema(BaseModel):
+        system_prompt: str = "You are a doctor"
+        user_prompt: str = "my name is santhosh"
+        response_model: BaseModel = Person  # Keep None then llm default returns str by passing only system,user prompts only.
+
+
+    llm = DSLLM()
+    res: Person = llm(IntentGenSchema())  # name='santhosh'
+    print(res)
+
