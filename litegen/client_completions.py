@@ -56,6 +56,7 @@ ModelType = Literal[
     "hf.co/bartowski/DeepSeek-R1-Distill-Qwen-14B-GGUF:Q5_K_M"
 ]
 
+
 BaseApiKeys = Literal[
     "ollama",
     "dsollama",
