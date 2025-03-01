@@ -294,18 +294,18 @@ class LLM:
 
     def __call__(
         self,
+        system_prompt: str = None,
         prompt: str = "",
+        response_format=None,
         schema:Optional[BaseModel]=None,
         messages: Optional[List[Dict[str, str]]] | str = None,
         model: ModelType = None,
-        system_prompt: str = None,
         context: Optional[List[Dict[str, str]]] = None,
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
         stream: bool = False,
         stop: Optional[List[str]] = None,
         tools=None,
-        response_format=None,
         **kwargs
     ):
         if not isinstance(prompt,str) and (prompt and schema is None):
