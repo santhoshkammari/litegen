@@ -123,6 +123,12 @@ class LLMSearch:
     def llm(self,system_prompt=None,prompt=None,response_format=None,model_name=None):
         if model_name is None:
             model_name = self.model_name or os.environ['OPENAI_MODEL_NAME']
+
+        import datetime
+        now = datetime.datetime.now()
+        formatted_time = now.strftime("%Y-%m-%d %H:%M:%S")
+        system_prompt += f"Today its : {formatted_time} and year is : {now.year}"
+
         return self.model(system_prompt=system_prompt,prompt=prompt,response_format=response_format,model=model_name)
 
     def _get_optimal_parameters(self, user_query: str) -> SearchParameters:
@@ -218,12 +224,6 @@ class LLMSearch:
             user_query
         )
 
-        # Step 1: Create a plan
-        import datetime
-        now = datetime.datetime.now()
-        formatted_time = now.strftime("%Y-%m-%d %H:%M:%S")
-        user_query += f" \n for your information current time is :{formatted_time}"
-
         # Run plan creation in thread pool
         loop = asyncio.get_event_loop()
         plan = await loop.run_in_executor(
@@ -234,9 +234,8 @@ class LLMSearch:
 
         if self.enable_think_tag:
             yield StreamMessage(type="plan",content="<think>")
-            yield StreamMessage(type="parameters", content=f"Search parameters: {parameters.max_urls}, {parameters.max_iterations}, {parameters.num_gen_search_queries}, {parameters.delay_between_searches}")
             yield StreamMessage(type="parameters", content=f"Search parameters: {parameters.max_urls} urls, {parameters.max_iterations}iters, {parameters.num_gen_search_queries} queries per step, {parameters.delay_between_searches} delay.")
-            yield StreamMessage(type="parameters", content=f"Using search parameters: {parameters.justification}\n")
+            yield StreamMessage(type="parameters", content=f"{parameters.justification}\n")
 
 
         yield StreamMessage(type="plan", content=f"Created research plan with {len(plan.steps)} steps")
@@ -274,7 +273,7 @@ class LLMSearch:
         if self.enable_think_tag:
             yield StreamMessage(type="plan",content="</think>")
 
-        yield StreamMessage(type="progress", content=f"Total {len(sources)} Sources ...")
+        yield StreamMessage(type="progress", content=f"Total {len(sources)} Sources ...\n")
 
         # Generate final report in thread pool
         loop = asyncio.get_event_loop()
