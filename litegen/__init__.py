@@ -7,3 +7,5 @@ genai
 from ._types import ModelType
 
 from .agents import Agent,ModelClient,AgentResponse
+
+from .feats.llmsearch import LLMSearch
