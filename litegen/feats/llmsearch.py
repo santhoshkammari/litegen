@@ -66,6 +66,37 @@ class StreamMessage(BaseModel):
     content: Any = Field(..., description="Content of the message")
 
 
+class SearchParameters(BaseModel):
+    """Parameters for conducting a search operation."""
+    max_urls: int = Field(
+        default=3,
+        ge=1,
+        le=10,
+        description="Number of URLs to fetch per search query (1-10)"
+    )
+    max_iterations: int = Field(
+        default=2,
+        ge=2,
+        le=10,
+        description="Maximum number of iterations per step (1-10)"
+    )
+    num_gen_search_queries: int = Field(
+        default=3,
+        ge=1,
+        le=5,
+        description="Number of search queries to generate per step (1-5)"
+    )
+    delay_between_searches: float = Field(
+        default=0.5,
+        ge=0.1,
+        le=2.0,
+        description="Delay between search requests in seconds (0.1-2.0)"
+    )
+    justification: str = Field(
+        default="",
+        description="Justification for the selected parameters"
+    )
+
 class LLMSearch:
     """LLM-based search tool that performs step-by-step research with parallel processing."""
 
@@ -94,6 +125,76 @@ class LLMSearch:
             model_name = self.model_name or os.environ['OPENAI_MODEL_NAME']
         return self.model(system_prompt=system_prompt,prompt=prompt,response_format=response_format,model=model_name)
 
+    def _get_optimal_parameters(self, user_query: str) -> SearchParameters:
+        """
+        Determine optimal search parameters based on the user query.
+
+        Args:
+            user_query: The user's search query
+
+        Returns:
+            SearchParameters: Optimized parameters for the search process
+        """
+        system_prompt = """
+        You are an AI search optimization specialist. Your task is to analyze a user's search query and determine the optimal search parameters that will produce the most helpful and relevant results.
+
+        For each search query, you need to determine:
+
+        1. max_urls: How many URLs to fetch per search query (1-10)
+           - For simple fact-checking queries: 1-2 URLs is sufficient
+           - For general knowledge questions: 3-5 URLs provides good coverage
+           - For complex research topics: 6-10 URLs ensures comprehensive information
+           - for other than this topic decide by your own number
+
+        2. max_iterations: Maximum number of search iterations per research step (2-10)
+           - For straightforward queries: 2 iterations is usually enough
+           - For questions requiring verification: 3-5 iterations helps confirm information
+           - For little higher topics: 5 - 8 iterations allows for thorough investigation
+           - For other than and if you feel like answer can't be find easity go beyond 8 and upto 10
+
+        3. num_gen_search_queries: Number of search queries to generate per step (1-5)
+           - For simple questions: 1-2 queries is sufficient
+           - For moderate complexity: 3 queries provides good coverage
+           - For complex or ambiguous topics: 4-5 queries explores different aspects
+
+        4. delay_between_searches: Delay between search requests in seconds (0.1-2.0)
+           - Balance between speed and avoiding rate limiting
+
+        IMPORTANT CONSIDERATIONS:
+        - If the user explicitly mentions "quick", "fast", or "simple", prioritize speed (lower values)
+        - If the user mentions "thorough", "comprehensive", or "detailed", prioritize completeness (higher values)
+        - For fact-checking or simple lookups, use minimal parameters
+        - For complex research topics, academic subjects, or technical questions, use more comprehensive parameters
+        - For questions involving current events, controversies, or multiple perspectives, use higher values to ensure balanced information
+
+        Provide a brief justification for your parameter selections.
+        """
+
+        prompt = f"Analyze this search query and determine the optimal search parameters: '{user_query}'"
+
+        try:
+            # Call the LLM with the SearchParameters model as the response format
+            parameters = self.llm(system_prompt=system_prompt, prompt=prompt, response_format=SearchParameters)
+
+            # Apply reasonable constraints to ensure the values are within acceptable ranges
+            parameters.max_urls = max(1, min(parameters.max_urls, 10))
+            parameters.max_iterations = max(1, min(parameters.max_iterations, 5))
+            parameters.num_gen_search_queries = max(1, min(parameters.num_gen_search_queries, 5))
+            parameters.delay_between_searches = max(0.1, min(parameters.delay_between_searches, 2.0))
+
+            return parameters
+        except Exception as e:
+            # Provide sensible defaults in case of an error
+            print(f"Error determining optimal parameters: {e}")
+            return SearchParameters(
+                max_urls=3,
+                max_iterations=2,
+                num_gen_search_queries=3,
+                delay_between_searches=0.5,
+                justification="Using default parameters due to error in parameter optimization."
+            )
+
+
     async def __call__(self, user_query: str, max_urls=1,
                        max_iterations=1
                        ) -> Generator[Union[StreamMessage, FinalReport], None, None]:
@@ -108,6 +209,15 @@ class LLMSearch:
             StreamMessage objects containing progress updates
             FinalReport as the last yielded item
         """
+
+        # Step 0: Get optimal parameters
+        loop = asyncio.get_event_loop()
+        parameters:SearchParameters = await loop.run_in_executor(
+            self.llm_executor,
+            self._get_optimal_parameters,
+            user_query
+        )
+
         # Step 1: Create a plan
         import datetime
         now = datetime.datetime.now()
@@ -124,6 +234,10 @@ class LLMSearch:
 
         if self.enable_think_tag:
             yield StreamMessage(type="plan",content="<think>")
+            yield StreamMessage(type="parameters", content=f"Search parameters: {parameters.max_urls}, {parameters.max_iterations}, {parameters.num_gen_search_queries}, {parameters.delay_between_searches}")
+            yield StreamMessage(type="parameters", content=f"Search parameters: {parameters.max_urls} urls, {parameters.max_iterations}iters, {parameters.num_gen_search_queries} queries per step, {parameters.delay_between_searches} delay.")
+            yield StreamMessage(type="parameters", content=f"Using search parameters: {parameters.justification}\n")
+
 
         yield StreamMessage(type="plan", content=f"Created research plan with {len(plan.steps)} steps")
 
@@ -137,7 +251,13 @@ class LLMSearch:
             yield StreamMessage(type="step", content=f'\nPerforming "{step.description}\n"')
 
             # Execute the step and yield progress updates
-            async for update in self._execute_step(step, max_urls, max_iterations):
+            async for update in self._execute_step(
+                step,
+                parameters.max_urls,
+                parameters.max_iterations,
+                parameters.num_gen_search_queries,
+                parameters.delay_between_searches
+            ):
                 yield update
 
         # First show the progress message about generating the final report
@@ -367,7 +487,9 @@ class LLMSearch:
                 gap_analysis="Unable to perform detailed gap analysis due to an error."
             )
 
-    async def _execute_step(self, step: PlanStep, max_urls, max_iterations) -> Generator[StreamMessage, None, None]:
+    async def _execute_step(self, step: PlanStep, max_urls, max_iterations,
+                            num_gen_search_queries,
+                            delay_between_searches) -> Generator[StreamMessage, None, None]:
         """Execute a single step in the search plan."""
         # Limit the number of search iterations per step
 
@@ -376,7 +498,7 @@ class LLMSearch:
             loop = asyncio.get_event_loop()
             queries = await loop.run_in_executor(
                 self.llm_executor,
-                partial(self._generate_search_queries, step, 3)
+                partial(self._generate_search_queries, step, num_gen_search_queries)
             )
 
 
@@ -395,6 +517,7 @@ class LLMSearch:
                 search_results = []
                 for idx, query in enumerate(queries, 1):
                     yield StreamMessage(type="progress", content=f"Searching {query.query}")
+                    await asyncio.sleep(delay_between_searches)  # 1 second between search requests
                     results = await self._perform_web_search(query.query, max_urls=max_urls)
                     search_results.append(results)
 
