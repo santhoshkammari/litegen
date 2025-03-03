@@ -545,7 +545,7 @@ class LLMSearch:
                 break
             else:
                 yield StreamMessage(type="status",
-                                    content=f"\n Missing {summary.gap_analysis}")
+                                    content=f"\n Wait {summary.gap_analysis}")
                 if iteration + 1 < max_iterations:
                     yield StreamMessage(type="progress", content="Trying additional queries...")
                 else:
