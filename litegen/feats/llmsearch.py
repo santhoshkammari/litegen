@@ -14,7 +14,7 @@ from litegen import LLM
 
 class SearchQuery(BaseModel):
     """A single search query to be sent to a search engine."""
-    query: str = Field(..., description="The search query string")
+    query: str = Field(..., description="The search query , do not keep it empty")
 
 
 class SearchResult(BaseModel):
@@ -24,9 +24,8 @@ class SearchResult(BaseModel):
     url: str = Field(..., description="URL of the search result")
 
 
-class StepSearchQueries(BaseModel):
-    """Collection of search queries for a single step."""
-    queries: List[SearchQuery] = Field(..., description="List of search queries for this step")
+class SearchQueries(BaseModel):
+    queries: List[SearchQuery]
 
 
 class StepSummary(BaseModel):
@@ -339,7 +338,7 @@ class LLMSearch:
         - Make each query specific and actionable
         - If you have information from previous iterations, focus on addressing the gaps
 
-        Your output should follow the StepSearchQueries schema with {n} complete, ready-to-use queries.
+        Your output should follow the SearchQueries schema with {n} complete, ready-to-use queries.
         """
 
         previous_info = ""
@@ -366,7 +365,7 @@ class LLMSearch:
         """
 
         try:
-            queries_response = self.llm(system_prompt=system_prompt, prompt=prompt, response_format=StepSearchQueries)
+            queries_response = self.llm(system_prompt=system_prompt, prompt=prompt, response_format=SearchQueries)
             # Validate that we have actual queries
             valid_queries = [q for q in queries_response.queries if q.query and q.query.strip()]
 
